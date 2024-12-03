@@ -26,7 +26,6 @@ fun Header(text: String = "") {
             verticalArrangement = Arrangement.Center
         ) {
             Spacer(modifier = Modifier.height(32.dp))
-
             Text(
                 text = text,
                 style = MaterialTheme.typography.h5,
