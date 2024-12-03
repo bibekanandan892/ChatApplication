@@ -33,7 +33,7 @@ class SearchViewModel @Inject constructor(
     fun collectEvents() {
         eventFlow.onEach { event ->
             if(event is SearchEvent.GetUserDetails){
-                toaster.error("${event.name}  ${event.gender}  ${event.preferGender}")
+//                toaster.error("${event.name}  ${event.gender}  ${event.preferGender}")
             }
 //            when (event) {
 //                is SignupEvent.OnNameChange -> {
