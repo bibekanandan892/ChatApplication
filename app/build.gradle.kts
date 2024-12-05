@@ -69,4 +69,19 @@ dependencies {
     androidTestImplementation(libs.hilt.android.testing)
     debugImplementation(libs.hilt.android.testing)
     kaptAndroidTest(libs.hilt.android.compiler)
+    implementation(libs.okhttp.v4120)
+
+    implementation(libs.ktor.serialization.kotlinx.json)
+
+    //room
+    implementation(libs.androidx.room)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+    annotationProcessor(libs.room.compiler)
+    implementation (libs.androidx.lifecycle.runtime.compose)
+    //coil
+    implementation(libs.coil)
+
+
+
 }

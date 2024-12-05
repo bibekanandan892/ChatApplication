@@ -4,5 +4,5 @@ enum class Destination{
     SIGNUP,
     HOME,
     SEARCH,
-    RECIPE_ALARM_DETAILS
+    CHAT
 }

@@ -18,7 +18,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SignupViewmodel @Inject constructor(
     private val navigator: Navigator,
-    private val toaster: Toaster
+    private val toaster: Toaster,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SignupState())
     val uiState get() = _uiState.asStateFlow()

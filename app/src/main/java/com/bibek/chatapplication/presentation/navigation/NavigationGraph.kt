@@ -10,11 +10,12 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.bibek.chatapplication.presentation.screen.chat.ChatViewModel
 import com.bibek.chatapplication.presentation.screen.home.HomeEvent
 import com.bibek.chatapplication.presentation.screen.home.HomeScreen
 import com.bibek.chatapplication.presentation.screen.home.HomeViewmodel
+import com.bibek.chatapplication.presentation.screen.search.ChatScreen
 import com.bibek.chatapplication.presentation.screen.search.SearchEvent
-import com.bibek.chatapplication.presentation.screen.search.SearchScreen
 import com.bibek.chatapplication.presentation.screen.search.SearchViewModel
 import com.bibek.chatapplication.presentation.screen.signup.SignupScreen
 import com.bibek.chatapplication.presentation.screen.signup.SignupViewmodel
@@ -29,7 +30,7 @@ fun SetupNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = startDestination,
+        startDestination = Destination.SEARCH.name,
     ) {
         composable(route = Destination.SIGNUP.name) {
             val signupViewmodel: SignupViewmodel = hiltViewModel()
@@ -53,12 +54,13 @@ fun SetupNavGraph(
             HomeScreen(uiState = uiState, onEvent = homeViewmodel::onEvent)
         }
         composable(
-            route = Destination.SEARCH.name + "/{$NAME_KEY}/{$GENDER_KEY}/{$PREFER_GENDER_KEY}",
-            arguments = listOf(
-                navArgument(NAME_KEY) { type = NavType.StringType },
-                navArgument(GENDER_KEY) { type = NavType.StringType },
-                navArgument(PREFER_GENDER_KEY) { type = NavType.StringType }
-            ),
+            route = Destination.SEARCH.name
+//                    + "/{$NAME_KEY}/{$GENDER_KEY}/{$PREFER_GENDER_KEY}",
+//            arguments = listOf(
+//                navArgument(NAME_KEY) { type = NavType.StringType },
+//                navArgument(GENDER_KEY) { type = NavType.StringType },
+//                navArgument(PREFER_GENDER_KEY) { type = NavType.StringType }
+//            ),
         ) { backStackEntry ->
             val name = backStackEntry.arguments?.getString(NAME_KEY).toString()
             val gender = backStackEntry.arguments?.getString(GENDER_KEY).toString()
@@ -74,7 +76,15 @@ fun SetupNavGraph(
                     )
                 )
             }
-            SearchScreen(uiState = uiState, onEvent = searchViewModel::onEvent)
+            ChatScreen(uiState = uiState, onEvent = searchViewModel::onEvent)
+        }
+        composable(
+            route = Destination.CHAT.name,
+        ) { backStackEntry ->
+
+            val chatViewModel: ChatViewModel = hiltViewModel()
+            val uiState by chatViewModel.uiState.collectAsState()
+//            ChatScreen()
         }
     }
 }
