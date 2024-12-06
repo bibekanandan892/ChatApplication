@@ -3,7 +3,7 @@ package com.bibek.chatapplication.presentation.screen.signup
 data class SignupState(
     val isLoading: Boolean = false,
     val gender : Gender? = null,
-    val name : String = ""
+    val udid : String = ""
     )
 
 sealed class Gender(val name : String){

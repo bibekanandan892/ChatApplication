@@ -1,4 +1,4 @@
-package com.bibek.chatapplication.utils
+package com.bibek.chatapplication.utils.logger
 
 
 import android.util.Log

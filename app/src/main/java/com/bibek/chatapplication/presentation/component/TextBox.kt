@@ -3,7 +3,6 @@ package com.bibek.chatapplication.presentation.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
@@ -26,7 +25,7 @@ fun TextBox(
     onTextChange: (String) -> Unit = {}
 ) {
     Row(
-        modifier = Modifier.widthIn(max = 500.dp),
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {

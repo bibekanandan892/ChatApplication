@@ -52,8 +52,7 @@ class HomeViewmodel @Inject constructor(
                         toaster.error("يرجى اختيار الجنس")
                     } else {
                         uiState.value.apply {
-                            navigator.navigate(destination = Destination.SEARCH.name + "/${name}/$gender/${preferGender?.name}")
-
+                            navigator.navigate(destination = Destination.SEARCH.name)
                         }
                     }
                 }

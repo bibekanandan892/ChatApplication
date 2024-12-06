@@ -224,9 +224,9 @@ private fun SearchedProfile(
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         ActionButton(text = "تجاوز", backgroundColor = Primary, onClick = onTranscendClick)
-        if (isRequestedForAccepted){
+        if (isRequestedForAccepted) {
             CircularProgressIndicator(modifier = Modifier.height(60.dp), color = Primary)
-        }else{
+        } else {
             ActionButton(text = "موافق", backgroundColor = Primary, onClick = onOkClick)
         }
     }

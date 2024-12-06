@@ -1,4 +1,4 @@
-package com.bibek.chatapplication.data.model.response.sync
+package com.bibek.chatapplication.data.model.websocket.response.sync
 
 
 import kotlinx.serialization.SerialName

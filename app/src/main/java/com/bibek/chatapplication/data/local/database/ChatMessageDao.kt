@@ -1,4 +1,4 @@
-package com.bibek.chatapplication.data.local
+package com.bibek.chatapplication.data.local.database
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -22,6 +22,12 @@ interface ChatMessageDao {
 
     @Query("SELECT * FROM Chat_Message_Entity")
     fun getAllChatMessage(): Flow<List<ChatMessageEntity>>
+
+    @Query("UPDATE Chat_Message_Entity SET status = :newStatus WHERE id = :messageId")
+    suspend fun updateStatusById(messageId: String, newStatus: String)
+
+    @Query("UPDATE Chat_Message_Entity SET status = :newStatus WHERE timeMillis = :messageTs")
+    suspend fun updateStatusByTs(messageTs: Long, newStatus: String)
 
     @Query("DELETE FROM Chat_Message_Entity")
     suspend fun deleteAll()

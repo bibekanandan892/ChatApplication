@@ -2,15 +2,18 @@ package com.bibek.chatapplication.presentation.screen.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.bibek.chatapplication.data.local.ChatMessageEntity
-import com.bibek.chatapplication.data.model.request.chat.ChatIdModel
-import com.bibek.chatapplication.data.model.request.message.ReceiveMessage
-import com.bibek.chatapplication.data.model.request.message.SendMessage
-import com.bibek.chatapplication.data.model.response.matched.MatchedResponse
+import com.bibek.chatapplication.data.local.database.ChatMessageEntity
+import com.bibek.chatapplication.data.model.websocket.request.ack.AckRequest
+import com.bibek.chatapplication.data.model.websocket.request.chat.ChatIdModel
+import com.bibek.chatapplication.data.model.websocket.request.message.ReceiveMessage
+import com.bibek.chatapplication.data.model.websocket.request.message.SendMessage
+import com.bibek.chatapplication.data.model.websocket.response.ack.AckResponseLong
+import com.bibek.chatapplication.data.model.websocket.response.ack.AckResponseString
+import com.bibek.chatapplication.data.model.websocket.response.matched.MatchedResponse
 import com.bibek.chatapplication.domain.repository.Repository
 import com.bibek.chatapplication.presentation.navigation.Destination
-import com.bibek.chatapplication.utils.Logger
 import com.bibek.chatapplication.utils.SocketEvent
+import com.bibek.chatapplication.utils.logger.Logger
 import com.bibek.chatapplication.utils.message.extractJsonContent
 import com.bibek.chatapplication.utils.navigation.Navigator
 import com.bibek.chatapplication.utils.toaster.Toaster
@@ -47,7 +50,7 @@ class SearchViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             delay(1000)
-            repository.connect("")
+            repository.connect()
             delay(1000)
             findMatch()
         }
@@ -139,7 +142,7 @@ class SearchViewModel @Inject constructor(
                             text = text
                         )
                     )
-                   reMatch()
+                    reMatch()
                 }
 
                 text.startsWith(SocketEvent.Message.route, true) -> {
@@ -162,6 +165,12 @@ class SearchViewModel @Inject constructor(
                             id = messageResponse.id
                         )
                     )
+                    val ackRequest = AckRequest(
+                        id = System.currentTimeMillis(),
+                        ref = messageResponse.id,
+                        status = "read"
+                    )
+                    repository.sendEvent(SocketEvent.Ack, text = json.encodeToString(ackRequest))
 
                 }
 
@@ -170,8 +179,24 @@ class SearchViewModel @Inject constructor(
                         message = SocketEvent.Ack.route + "->" + extractJsonContent(
                             socketEvent = SocketEvent.Ack,
                             text = text
-                        )
+                        ) + "]"
                     )
+                    val ack =
+                        extractJsonContent(socketEvent = SocketEvent.Ack, text = text)
+                    try {
+                        val ackResponse = json.decodeFromString<AckResponseString>(ack)
+                        ackResponse.apply {
+                            if (!ref.isNullOrEmpty() && !status.isNullOrEmpty()) {
+                                repository.updateStatusById(
+                                    messageId = ref,
+                                    newStatus = status
+                                )
+                            }
+                        }
+                    } catch (_: Exception) {
+
+                    }
+
                 }
 
                 text.startsWith(SocketEvent.Type.route, true) -> {
@@ -199,6 +224,31 @@ class SearchViewModel @Inject constructor(
                             text = text
                         )
                     )
+                    val sent = extractJsonContent(socketEvent = SocketEvent.Seen, text = text)
+                    var ackResponseLong: AckResponseLong? = null
+                    var ackResponseString: AckResponseString? = null
+                    try {
+                        ackResponseString = json.decodeFromString<AckResponseString>(sent)
+                        ackResponseString.apply {
+                            if (!ref.isNullOrEmpty()) {
+                                repository.updateStatusById(
+                                    messageId = ref,
+                                    newStatus = Message.Sent.status
+                                )
+                            }
+                        }
+                    } catch (_: Exception) {
+                        ackResponseLong = json.decodeFromString<AckResponseLong>(sent)
+                        ackResponseLong.apply {
+                            if (ref != null) {
+                                repository.updateStatusByTs(
+                                    messageTs = ref,
+                                    newStatus = Message.Sent.status
+                                )
+                            }
+                        }
+                    }
+                    delay(1000)
                 }
 
                 else -> {
@@ -217,20 +267,13 @@ class SearchViewModel @Inject constructor(
         eventFlow.onEach { event ->
 
             when (event) {
-//                is SignupEvent.OnNameChange -> {
-//                    _uiState.update { uiState -> uiState.copy(name = event.name) }
-//                }
-//
                 is SearchEvent.NavigateToChat -> {
                     uiState.value.apply {
                         navigator.navigate(destination = Destination.CHAT.name)
                     }
                 }
 
-                SearchEvent.OnRematchClick -> {
-                    reMatch()
-                }
-
+                SearchEvent.OnRematchClick -> reMatch()
                 SearchEvent.OnAcceptClick -> {
                     if (!uiState.value.isRequestAccepted) {
                         _uiState.update { uiState -> uiState.copy(isRequestedForAccepted = true) }
@@ -258,7 +301,7 @@ class SearchViewModel @Inject constructor(
                                 message = request.content,
                                 userName = uiState.value.username,
                                 chatId = uiState.value.chatId,
-                                status = "",
+                                status = Message.Sending.status,
                                 id = request.id
                             )
                         )
@@ -272,17 +315,19 @@ class SearchViewModel @Inject constructor(
                     _uiState.update { uiState -> uiState.copy(currentMessage = event.value) }
                 }
 
-                SearchEvent.OnLeaveChatClick ->  reMatch()
+                SearchEvent.OnLeaveChatClick -> reMatch()
                 else -> {}
             }
         }.launchIn(viewModelScope)
     }
-    private fun clearDb(){
-        viewModelScope.launch(Dispatchers.IO){
+
+    private fun clearDb() {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.deleteAllChats()
         }
     }
-    private fun reMatch(){
+
+    private fun reMatch() {
         _uiState.update { uiState ->
             uiState.copy(
                 chatState = ChatState.Matching,

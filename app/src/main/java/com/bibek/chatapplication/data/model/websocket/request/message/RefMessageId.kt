@@ -1,4 +1,4 @@
-package com.bibek.chatapplication.data.model.request.message
+package com.bibek.chatapplication.data.model.websocket.request.message
 
 
 import kotlinx.serialization.SerialName

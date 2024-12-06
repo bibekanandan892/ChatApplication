@@ -15,7 +15,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.bibek.chatapplication.presentation.component.ConnectivityStatus
-import com.bibek.chatapplication.presentation.navigation.Destination
 import com.bibek.chatapplication.presentation.navigation.SetupNavGraph
 import com.bibek.chatapplication.utils.navigation.Navigator
 import com.bibek.chatapplication.utils.toaster.Toaster
@@ -31,10 +30,10 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var toaster: Toaster
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         toasterSetup()
-
         setContent {
             val navGraphController = rememberNavController()
             val mainViewModel: MainViewModel = hiltViewModel()
@@ -43,7 +42,6 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(key1 = true) {
                 navigationSetup(navGraphController)
             }
-
 
             Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                 Column(
@@ -55,7 +53,7 @@ class MainActivity : ComponentActivity() {
                         ConnectivityStatus(it)
                     }
                     SetupNavGraph(
-                        startDestination = Destination.SIGNUP.name,
+                        startDestination = mainViewModel.startDestination.value.name,
                         navController = navGraphController
                     )
                 }

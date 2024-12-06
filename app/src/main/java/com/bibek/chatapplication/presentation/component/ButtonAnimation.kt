@@ -44,7 +44,6 @@ fun Modifier.pressClickEffect() = composed {
 }
 
 fun Modifier.bounceClick(onClick: () -> Unit) = composed {
-    55
     var buttonStateChange by remember { mutableStateOf(ButtonStateChange.Idle) }
 
     val scale by animateFloatAsState(if (buttonStateChange == ButtonStateChange.Pressed) 0.85f else 1f)
