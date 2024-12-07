@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -22,18 +20,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.bibek.chatapplication.R
+import com.bibek.chatapplication.presentation.component.Button
 import com.bibek.chatapplication.presentation.component.Header
 import com.bibek.chatapplication.presentation.component.RightAlignText
 import com.bibek.chatapplication.presentation.component.TextBox
 import com.bibek.chatapplication.presentation.component.bounceClick
 import com.bibek.chatapplication.presentation.theme.Primary
+import com.bibek.chatapplication.utils.getAndroidId
 
 @Composable
 fun SignupScreen(uiState: SignupState, onEvent: (SignupEvent) -> Unit = {}) {
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxSize(),
@@ -41,7 +43,6 @@ fun SignupScreen(uiState: SignupState, onEvent: (SignupEvent) -> Unit = {}) {
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Header(text = "حياك بيننا")
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -53,13 +54,11 @@ fun SignupScreen(uiState: SignupState, onEvent: (SignupEvent) -> Unit = {}) {
                 color = Color.Gray,
                 modifier = Modifier.padding(bottom = 4.dp)
             )
-            TextBox(text = uiState.name, hint = "يجب أن لا يقل عن ٣ أحرف ", onTextChange = {
+            TextBox(text = uiState.udid, hint = "يجب أن لا يقل عن ٣ أحرف ", onTextChange = {
                 onEvent(
                     SignupEvent.OnNameChange(it)
                 )
             })
-
-
         }
         Column(
             modifier = Modifier
@@ -68,7 +67,6 @@ fun SignupScreen(uiState: SignupState, onEvent: (SignupEvent) -> Unit = {}) {
             horizontalAlignment = Alignment.End
         ) {
             Spacer(modifier = Modifier.height(24.dp))
-
             RightAlignText(
                 text = "جنسك",
             )
@@ -102,22 +100,12 @@ fun SignupScreen(uiState: SignupState, onEvent: (SignupEvent) -> Unit = {}) {
                 textAlign = TextAlign.Center
             )
         }
-
-
         Button(
-            onClick = { onEvent(SignupEvent.NavigateToHome) },
+            text = "استمر",
+            onClick = { onEvent(SignupEvent.OnSignupClick(getAndroidId(context = context))) },
             modifier = Modifier
-                .fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray),
-        ) {
-            Column(
-                modifier = Modifier.height(45.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(text = "استمر", color = White)
-            }
-        }
+                .fillMaxWidth(), isLoading = uiState.isLoading
+        )
     }
 }
 

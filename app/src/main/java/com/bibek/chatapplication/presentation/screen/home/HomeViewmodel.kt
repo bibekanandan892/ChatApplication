@@ -3,6 +3,7 @@ package com.bibek.chatapplication.presentation.screen.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bibek.chatapplication.presentation.navigation.Destination
+import com.bibek.chatapplication.utils.logger.Logger
 import com.bibek.chatapplication.utils.navigation.Navigator
 import com.bibek.chatapplication.utils.toaster.Toaster
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,6 +29,7 @@ class HomeViewmodel @Inject constructor(
 
     init {
         collectEvents()
+        Logger.log("Init HomeViewModel")
     }
 
     fun onEvent(event: HomeEvent) {
@@ -45,15 +47,13 @@ class HomeViewmodel @Inject constructor(
                         )
                     }
                 }
-
                 is HomeEvent.OnGenderSelect -> _uiState.update { uiState -> uiState.copy(preferGender = event.gender) }
                 HomeEvent.NavigateToSearch -> {
                     if (uiState.value.preferGender == null) {
                         toaster.error("يرجى اختيار الجنس")
                     } else {
                         uiState.value.apply {
-                            navigator.navigate(destination = Destination.SEARCH.name + "/${name}/$gender/${preferGender?.name}")
-
+                            navigator.navigate(destination = Destination.SEARCH.name)
                         }
                     }
                 }

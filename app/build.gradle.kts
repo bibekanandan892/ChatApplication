@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId = "com.bibek.chatapplication"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -40,6 +40,14 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
+    }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            pickFirsts += "META-INF/DEPENDENCIES"
+        }
     }
 }
 
@@ -69,4 +77,41 @@ dependencies {
     androidTestImplementation(libs.hilt.android.testing)
     debugImplementation(libs.hilt.android.testing)
     kaptAndroidTest(libs.hilt.android.compiler)
+    implementation(libs.okhttp.v4120)
+
+    //ktor
+    implementation(libs.ktor.core)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.gson)
+    implementation(libs.ktor.client.apache)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.server.content.negotiation)
+    implementation(libs.ktor.core)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.serialization)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.ktor.client.auth)
+
+    //room
+    implementation(libs.androidx.room)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+    annotationProcessor(libs.room.compiler)
+
+    implementation (libs.androidx.lifecycle.runtime.compose)
+    //coil
+    implementation(libs.coil)
+
+    //retrofit
+    implementation(libs.okkhttp)
+    implementation(libs.retrofit2.kotlin.coroutines.adapter)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.converter.moshi)
+    implementation(libs.converter.scalars)
+    //data store
+    implementation (libs.androidx.datastore.preferences)
+    // Message Bar Compose
+    implementation(libs.messagebarcomposewithloading)
 }

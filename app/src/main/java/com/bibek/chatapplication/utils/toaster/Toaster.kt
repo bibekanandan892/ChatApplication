@@ -11,6 +11,7 @@ import javax.inject.Singleton
 class Toaster @Inject constructor() {
     private val _successFlow = MutableSharedFlow<String>()
     val successFlow: Flow<String> = _successFlow
+
     private val _errorFlow = MutableSharedFlow<String>()
     val errorFlow: Flow<String> = _errorFlow
 
