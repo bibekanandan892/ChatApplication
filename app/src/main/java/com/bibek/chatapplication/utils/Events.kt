@@ -13,4 +13,9 @@ sealed class SocketEvent(val route: String) {
     data object Type : SocketEvent("""["type",""")
     data object Send : SocketEvent("""["send",""")
     data object Seen : SocketEvent("""["seen",""")
+    data object OnOpen : SocketEvent("OnOpen")
+    data object OnClosing : SocketEvent("OnClose")
+    data object OnClosed : SocketEvent("OnClosed")
+    data object OnFailure : SocketEvent("OnFailure")
+
 }

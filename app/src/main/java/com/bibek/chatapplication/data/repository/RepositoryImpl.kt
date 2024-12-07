@@ -1,8 +1,10 @@
 package com.bibek.chatapplication.data.repository
 
 import com.bibek.chatapplication.data.local.appdatastore.AppDataStore
-import com.bibek.chatapplication.data.local.database.ChatMessageDao
-import com.bibek.chatapplication.data.local.database.ChatMessageEntity
+import com.bibek.chatapplication.data.local.database.chat_message.ChatMessageDao
+import com.bibek.chatapplication.data.local.database.chat_message.ChatMessageEntity
+import com.bibek.chatapplication.data.local.database.failed_message.FailedMessageDao
+import com.bibek.chatapplication.data.local.database.failed_message.FailedMessageEntity
 import com.bibek.chatapplication.data.model.authenticate.req.AuthRequest
 import com.bibek.chatapplication.data.model.authenticate.res.AuthResponse
 import com.bibek.chatapplication.data.model.chat.ChatMessage
@@ -30,6 +32,7 @@ import java.util.UUID
 class RepositoryImpl(
     private val websocketClient: WebsocketClient,
     private val chatMessageDao: ChatMessageDao,
+    private val failedMessageDao: FailedMessageDao,
     private val httpClient: HttpClient,
     private val appDataStore: AppDataStore
 ) : Repository {
@@ -46,6 +49,7 @@ class RepositoryImpl(
             auth = appDataStore.getAuth().first()
         )
     }
+
 
     override fun sendEvent(
         event: SocketEvent,
@@ -85,7 +89,7 @@ class RepositoryImpl(
         }
     }
 
-    override suspend fun insertChat(chatMessageEntity: ChatMessageEntity) {
+    override suspend fun insertFailedChat(chatMessageEntity: ChatMessageEntity) {
         chatMessageDao.insertChat(chatMessageEntity)
     }
 
@@ -139,6 +143,22 @@ class RepositoryImpl(
 
     override fun getToken(): Flow<String?> {
         return appDataStore.getToken()
+    }
+
+    override fun dispose() {
+        websocketClient.dispose()
+    }
+
+    override suspend fun insertFailedChat(failedMessageEntity: FailedMessageEntity) {
+        failedMessageDao.insertChat(failedMessageEntity)
+    }
+
+    override suspend fun getAllFailedMessage(): List<FailedMessageEntity> {
+        return failedMessageDao.getAllFailedMessage()
+    }
+
+    override suspend fun deleteAllFailedMessage() {
+        failedMessageDao.deleteAllFailedMessage()
     }
 
 }

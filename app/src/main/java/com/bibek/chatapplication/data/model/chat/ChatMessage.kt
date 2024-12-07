@@ -1,6 +1,6 @@
 package com.bibek.chatapplication.data.model.chat
 
-import com.bibek.chatapplication.data.local.database.ChatMessageEntity
+import com.bibek.chatapplication.data.local.database.chat_message.ChatMessageEntity
 import com.bibek.chatapplication.presentation.screen.search.Message
 import com.bibek.chatapplication.utils.convertTimeMillisToTimeFormat
 

@@ -1,4 +1,4 @@
-package com.bibek.chatapplication.data.local.database
+package com.bibek.chatapplication.data.local.database.chat_message
 
 import androidx.room.Dao
 import androidx.room.Insert

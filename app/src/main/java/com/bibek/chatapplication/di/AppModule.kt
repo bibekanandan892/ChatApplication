@@ -4,8 +4,9 @@ import android.content.Context
 import androidx.room.Room
 import com.bibek.chatapplication.data.local.appdatastore.AppDataStore
 import com.bibek.chatapplication.data.local.appdatastore.AppDateStoreImpl
-import com.bibek.chatapplication.data.local.database.ChatMessageDao
 import com.bibek.chatapplication.data.local.database.ChatMessageDatabase
+import com.bibek.chatapplication.data.local.database.chat_message.ChatMessageDao
+import com.bibek.chatapplication.data.local.database.failed_message.FailedMessageDao
 import com.bibek.chatapplication.data.remote.WebsocketClient
 import com.bibek.chatapplication.data.repository.RepositoryImpl
 import com.bibek.chatapplication.domain.repository.Repository
@@ -55,14 +56,17 @@ object AppModule {
     fun provideRepository(
         websocketClient: WebsocketClient,
         chatMessageDao: ChatMessageDao,
+        failedMessageDao: FailedMessageDao,
         httpClient: HttpClient,
         appDataStore: AppDataStore
     ): Repository {
         return RepositoryImpl(
             websocketClient = websocketClient,
             chatMessageDao = chatMessageDao,
+            failedMessageDao = failedMessageDao,
             httpClient = httpClient,
-            appDataStore = appDataStore
+            appDataStore = appDataStore,
+
         )
     }
 
@@ -115,6 +119,11 @@ object AppModule {
     @Provides
     fun provideChatMessageDao(chatMessageDatabase: ChatMessageDatabase): ChatMessageDao =
         chatMessageDatabase.chatMessageDao()
+
+    @Singleton
+    @Provides
+    fun providesFailedMessageDao(chatMessageDatabase: ChatMessageDatabase): FailedMessageDao =
+        chatMessageDatabase.failedMessageDao()
 
     // Provides a singleton instance of AppDataStore
     @Singleton

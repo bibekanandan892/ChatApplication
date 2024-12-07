@@ -112,4 +112,6 @@ dependencies {
     implementation(libs.converter.scalars)
     //data store
     implementation (libs.androidx.datastore.preferences)
+    // Message Bar Compose
+    implementation(libs.messagebarcomposewithloading)
 }

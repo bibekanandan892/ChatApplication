@@ -1,6 +1,7 @@
 package com.bibek.chatapplication.domain.repository
 
-import com.bibek.chatapplication.data.local.database.ChatMessageEntity
+import com.bibek.chatapplication.data.local.database.chat_message.ChatMessageEntity
+import com.bibek.chatapplication.data.local.database.failed_message.FailedMessageEntity
 import com.bibek.chatapplication.data.model.authenticate.req.AuthRequest
 import com.bibek.chatapplication.data.model.authenticate.res.AuthResponse
 import com.bibek.chatapplication.data.model.chat.ChatMessage
@@ -23,7 +24,7 @@ interface Repository {
         request: AuthRequest
     ): Flow<AuthResponse>
     fun getAllChatMessage(): Flow<List<ChatMessage>>
-    suspend fun insertChat(chatMessageEntity: ChatMessageEntity)
+    suspend fun insertFailedChat(chatMessageEntity: ChatMessageEntity)
     suspend fun deleteAllChats()
     suspend fun updateStatusById(messageId: String, newStatus: String)
     suspend fun updateStatusByTs(messageTs: Long, newStatus: String)
@@ -37,5 +38,10 @@ interface Repository {
     fun getPassword() : Flow<String?>
     fun getDeviceId(): Flow<String?>
     fun getToken(): Flow<String?>
+    fun dispose()
+    suspend fun insertFailedChat(failedMessageEntity: FailedMessageEntity)
+    suspend fun getAllFailedMessage(): List<FailedMessageEntity>
+    suspend fun deleteAllFailedMessage()
+
 
 }

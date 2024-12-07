@@ -43,7 +43,6 @@ fun SignupScreen(uiState: SignupState, onEvent: (SignupEvent) -> Unit = {}) {
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Header(text = "حياك بيننا")
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -60,8 +59,6 @@ fun SignupScreen(uiState: SignupState, onEvent: (SignupEvent) -> Unit = {}) {
                     SignupEvent.OnNameChange(it)
                 )
             })
-
-
         }
         Column(
             modifier = Modifier
@@ -70,7 +67,6 @@ fun SignupScreen(uiState: SignupState, onEvent: (SignupEvent) -> Unit = {}) {
             horizontalAlignment = Alignment.End
         ) {
             Spacer(modifier = Modifier.height(24.dp))
-
             RightAlignText(
                 text = "جنسك",
             )
@@ -104,14 +100,11 @@ fun SignupScreen(uiState: SignupState, onEvent: (SignupEvent) -> Unit = {}) {
                 textAlign = TextAlign.Center
             )
         }
-
-
         Button(
             text = "استمر",
             onClick = { onEvent(SignupEvent.OnSignupClick(getAndroidId(context = context))) },
             modifier = Modifier
-                .fillMaxWidth()
-            , isLoading = uiState.isLoading
+                .fillMaxWidth(), isLoading = uiState.isLoading
         )
     }
 }

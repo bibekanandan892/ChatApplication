@@ -33,20 +33,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bibek.chatapplication.R
+import com.bibek.chatapplication.presentation.component.IconWithText
+import com.bibek.chatapplication.presentation.component.ReceivedMessage
+import com.bibek.chatapplication.presentation.component.SentMessage
 import com.bibek.chatapplication.presentation.component.bounceClick
-import com.bibek.chatapplication.presentation.screen.search.Message
 import com.bibek.chatapplication.presentation.screen.search.SearchEvent
 import com.bibek.chatapplication.presentation.screen.search.SearchState
 import com.bibek.chatapplication.presentation.theme.AppGray
-import com.bibek.chatapplication.presentation.theme.LightGray
 
 @Composable
 fun ChatScreenUI(uiState: SearchState = SearchState(), onEvent: (SearchEvent) -> Unit = {}) {
@@ -104,7 +103,6 @@ fun ChatScreenUI(uiState: SearchState = SearchState(), onEvent: (SearchEvent) ->
                 }
             }
             Row(modifier = Modifier.padding(horizontal = 10.dp)) {
-
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -149,117 +147,12 @@ fun ChatScreenUI(uiState: SearchState = SearchState(), onEvent: (SearchEvent) ->
                             }
                     )
                 }
-
             }
-
-
             Spacer(Modifier.height(20.dp))
         }
     }
 }
 
-@Composable
-fun ReceivedMessage(message: String, time: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        horizontalArrangement = Arrangement.Start
-    ) {
-        Column {
-            Box(
-                modifier = Modifier
-                    .background(
-                        Color(0xFFECEFF1), shape = RoundedCornerShape(
-                            topEnd = 12.dp,
-                            bottomEnd = 12.dp,
-                            bottomStart = 12.dp
-                        )
-                    )
-                    .border(
-                        width = 1.dp, shape = RoundedCornerShape(
-                            topEnd = 12.dp,
-                            bottomEnd = 12.dp,
-                            bottomStart = 12.dp
-                        ), color = LightGray.copy(0.1f)
-                    )
-                    .padding(8.dp)
-            ) {
-                Column {
-                    Text(text = message, color = Color.Black)
-
-                    Spacer(modifier = Modifier.height(4.dp)) // Add spacing between message and time/status
-                    Row(
-                        modifier = Modifier.padding(start = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(text = time, color = Color.Gray, fontSize = 12.sp)
-                    }
-                }
-            }
-
-        }
-    }
-}
-
-@Composable
-fun SentMessage(message: String, time: String, status: Message?) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        horizontalArrangement = Arrangement.End
-    ) {
-        Column {
-            Box(
-                modifier = Modifier
-                    .background(
-                        Color(0xFFBBDEFB),
-                        shape = RoundedCornerShape(
-                            topEnd = 12.dp,
-                            topStart = 12.dp,
-                            bottomStart = 12.dp
-                        )
-                    )
-                    .border(
-                        width = 1.dp, shape = RoundedCornerShape(
-                            topEnd = 12.dp,
-                            topStart = 12.dp,
-                            bottomStart = 12.dp
-                        ), color = LightGray.copy(0.1f)
-                    )
-                    .padding(8.dp)
-            ) {
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(text = message, color = Color.Black)
-                    Spacer(modifier = Modifier.height(4.dp)) // Add spacing between message and time/status
-                    Row(
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = time,
-                            color = Color.Gray,
-                            fontSize = 12.sp
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = when (status) {
-                                Message.Sending -> "⏳"
-                                Message.Sent -> "✓"
-                                Message.Read -> "✓✓"
-                                Message.None -> ""
-                                else -> ""
-                            },
-                            color = Color.Gray,
-                            fontSize = 12.sp
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
 
 @Preview
 @Composable
@@ -318,27 +211,7 @@ fun UserActionRow(name: String = "", onClick: () -> Unit = {}) {
                         .size(24.dp)
                 )
             }
-
         }
     }
 }
 
-@Composable
-fun IconWithText(icon: Painter, label: String) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(8.dp)
-    ) {
-        Icon(
-            painter = icon,
-            contentDescription = label,
-            tint = Color(0xFF64B5F6), // Light blue color
-            modifier = Modifier.size(24.dp)
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.caption,
-            color = Color.Gray
-        )
-    }
-}

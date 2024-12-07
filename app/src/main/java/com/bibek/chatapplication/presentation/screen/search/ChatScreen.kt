@@ -1,5 +1,6 @@
 package com.bibek.chatapplication.presentation.screen.search
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -7,8 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -25,6 +24,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bibek.chatapplication.R
+import com.bibek.chatapplication.presentation.component.ActionButton
+import com.bibek.chatapplication.presentation.component.ExitChatDialog
 import com.bibek.chatapplication.presentation.component.TabItem
 import com.bibek.chatapplication.presentation.screen.chat.ChatScreenUI
 import com.bibek.chatapplication.presentation.theme.DarkGray
@@ -35,6 +36,15 @@ import com.bibek.chatapplication.presentation.theme.Primary
 fun ChatScreen(
     uiState: SearchState, onEvent: (SearchEvent) -> Unit = {}
 ) {
+    BackHandler {
+        onEvent(SearchEvent.OnBackClick)
+    }
+    ExitChatDialog(showDialog = uiState.isShowDialog,
+        onConfirm = {
+            onEvent(SearchEvent.OnLeaveChatClick)
+        }, onDismiss = {
+            onEvent(SearchEvent.OnDialogDismissClick)
+        })
     if (uiState.chatState == ChatState.Accepted) {
         ChatScreenUI(uiState = uiState, onEvent = onEvent)
     } else {
@@ -64,9 +74,7 @@ fun SearchScreen(uiState: SearchState, onEvent: (SearchEvent) -> Unit = {}) {
             TabItem(text = "أنثى", isSelected = true)
             TabItem(text = "ذكر", isSelected = false)
         }
-
         // Profile Image with Progress
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -89,8 +97,6 @@ fun SearchScreen(uiState: SearchState, onEvent: (SearchEvent) -> Unit = {}) {
                     })
             }
         }
-
-
         // Gems Count
         Row(
             modifier = Modifier
@@ -215,7 +221,6 @@ private fun SearchedProfile(
             fontSize = 16.sp
         )
     }
-
     // Action Buttons
     Row(
         modifier = Modifier
@@ -233,16 +238,3 @@ private fun SearchedProfile(
     Spacer(modifier = Modifier.height(40.dp))
 }
 
-@Composable
-fun ActionButton(text: String, backgroundColor: Color, onClick: () -> Unit = {}) {
-    Button(
-        onClick = onClick,
-        colors = ButtonDefaults.buttonColors(backgroundColor = backgroundColor),
-        modifier = Modifier
-            .width(120.dp)
-            .height(50.dp),
-        shape = CircleShape
-    ) {
-        Text(text = text, color = Color.White, fontSize = 16.sp)
-    }
-}

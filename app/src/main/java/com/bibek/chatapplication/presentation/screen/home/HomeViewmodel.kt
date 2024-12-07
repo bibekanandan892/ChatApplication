@@ -3,6 +3,7 @@ package com.bibek.chatapplication.presentation.screen.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bibek.chatapplication.presentation.navigation.Destination
+import com.bibek.chatapplication.utils.logger.Logger
 import com.bibek.chatapplication.utils.navigation.Navigator
 import com.bibek.chatapplication.utils.toaster.Toaster
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,6 +29,7 @@ class HomeViewmodel @Inject constructor(
 
     init {
         collectEvents()
+        Logger.log("Init HomeViewModel")
     }
 
     fun onEvent(event: HomeEvent) {

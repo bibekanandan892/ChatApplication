@@ -9,7 +9,6 @@ import com.bibek.chatapplication.presentation.navigation.Destination
 import com.bibek.chatapplication.utils.GENERIC_ERROR_MESSAGE
 import com.bibek.chatapplication.utils.generateBasicAuthHeader
 import com.bibek.chatapplication.utils.generateToken
-import com.bibek.chatapplication.utils.logger.Logger
 import com.bibek.chatapplication.utils.navigation.Navigator
 import com.bibek.chatapplication.utils.toaster.Toaster
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,14 +20,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.UUID
 import javax.inject.Inject
@@ -46,9 +43,6 @@ class SignupViewmodel @Inject constructor(
 
     init {
         collectEvents()
-        viewModelScope.launch{
-            Logger.log(repository.getAuth().first().toString())
-        }
     }
 
     fun onEvent(event: SignupEvent) {
@@ -58,22 +52,17 @@ class SignupViewmodel @Inject constructor(
     fun collectEvents() {
         eventFlow.onEach { event ->
             when (event) {
-                is SignupEvent.OnNameChange -> {
-                    _uiState.update { uiState -> uiState.copy(udid = event.name) }
-                }
+                is SignupEvent.OnNameChange -> _uiState.update { uiState -> uiState.copy(udid = event.name) }
 
-                is SignupEvent.OnSignupClick -> {
-                    uiState.value.apply {
-                        if (udid.isEmpty() || udid.length < 8) {
-                            toaster.error("يرجى إدخال اسم صالح")
-                        } else if (gender == null) {
-                            toaster.error("يرجى اختيار الجنس")
-                        } else {
-                            signup(event.deviceId)
-                        }
+                is SignupEvent.OnSignupClick -> uiState.value.apply {
+                    if (udid.isEmpty() || udid.length < 8) {
+                        toaster.error("يرجى إدخال اسم صالح")
+                    } else if (gender == null) {
+                        toaster.error("يرجى اختيار الجنس")
+                    } else {
+                        signup(event.deviceId)
                     }
                 }
-
                 is SignupEvent.OnGenderSelect -> _uiState.update { uiState ->
                     uiState.copy(
                         gender = event.gender
@@ -85,14 +74,8 @@ class SignupViewmodel @Inject constructor(
 
     private fun signup(deviceId: String = "") {
         val sessionUUID = UUID.randomUUID().toString()
-        Logger.log("Generated sessionUUID: $sessionUUID")
-
         val token = generateToken(sessionId = sessionUUID, deviceId = deviceId)
-        Logger.log("Generated token: $token")
-
         val authorization = generateBasicAuthHeader(deviceId = deviceId, token = token)
-        Logger.log("Generated authorization: $authorization")
-
         repository.authenticate(
             udid = uiState.value.udid,
             deviceId = deviceId,

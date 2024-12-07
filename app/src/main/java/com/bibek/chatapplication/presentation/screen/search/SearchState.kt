@@ -15,7 +15,8 @@ data class SearchState(
     val allChats: Flow<List<ChatMessage>> = flowOf(),
     val currentMessage: String = "",
     val isRequestedForAccepted: Boolean = false,
-    val isRequestAccepted: Boolean = false
+    val isRequestAccepted: Boolean = false,
+    val isShowDialog : Boolean = false
 )
 
 sealed interface ChatState {

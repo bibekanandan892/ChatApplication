@@ -5,5 +5,4 @@ enum class Destination {
     SIGNUP,
     HOME,
     SEARCH,
-    CHAT
 }
