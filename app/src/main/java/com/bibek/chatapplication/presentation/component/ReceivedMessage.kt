@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -61,7 +62,7 @@ fun ReceivedMessage(message: String, time: String) {
                     )
                     .padding(8.dp) // Add padding inside the message box
             ) {
-                Column {
+                Column(horizontalAlignment = Alignment.End) {
                     Text(text = message, color = Color.Black) // Display message in black color
                     Spacer(modifier = Modifier.height(4.dp)) // Add space between message and timestamp
                     Row(
