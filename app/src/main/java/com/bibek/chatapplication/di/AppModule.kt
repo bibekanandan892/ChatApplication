@@ -63,9 +63,10 @@ object AppModule {
     fun provideOkHttp(): OkHttpClient {
         return OkHttpClient()
     }
+
     @Provides
     @Singleton
-    fun provideDispatcher():DispatcherProvider = DefaultDispatcherProvider()
+    fun provideDispatcher(): DispatcherProvider = DefaultDispatcherProvider()
 
     /**
      * Provides a singleton instance of [Repository] for managing application data and operations.
