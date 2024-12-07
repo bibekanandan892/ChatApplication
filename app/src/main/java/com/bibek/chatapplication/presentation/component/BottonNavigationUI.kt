@@ -21,11 +21,23 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bibek.chatapplication.R
 
-@Preview
+/**
+ * A composable function that represents a bottom navigation bar with three items.
+ *
+ * The bottom navigation consists of three navigation items: "حسابي" (My Account),
+ * "فضفض" (Unlock), and "المحادثات" (Conversations). The central "فضفض" item is
+ * highlighted with a red background and a larger size, while the other items are
+ * icons with labels.
+ *
+ * This UI can be used for navigation in the bottom of the screen.
+ *
+ * @param onMyAccountClick A lambda function executed when the "حسابي" (My Account) item is clicked.
+ * @param onUnlockClick A lambda function executed when the central "فضفض" (Unlock) item is clicked.
+ * @param onConversationsClick A lambda function executed when the "المحادثات" (Conversations) item is clicked.
+ */
 @Composable
 fun BottomNavigationUI(
     onMyAccountClick: () -> Unit = {},
@@ -71,9 +83,18 @@ fun BottomNavigationUI(
             )
         }
     }
-
 }
 
+/**
+ * A composable function that represents a single navigation item in the bottom navigation.
+ *
+ * This item includes an icon and a label. When clicked, it triggers the provided `onClick`
+ * lambda function.
+ *
+ * @param icon The drawable resource ID for the icon.
+ * @param label The label text for the navigation item.
+ * @param onClick A lambda function executed when the item is clicked. By default, it does nothing.
+ */
 @Composable
 fun NavigationItem(
     @DrawableRes icon: Int,

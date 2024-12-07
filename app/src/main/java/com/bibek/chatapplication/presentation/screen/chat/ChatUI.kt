@@ -1,5 +1,4 @@
 package com.bibek.chatapplication.presentation.screen.chat
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -47,15 +46,26 @@ import com.bibek.chatapplication.presentation.screen.search.SearchEvent
 import com.bibek.chatapplication.presentation.screen.search.SearchState
 import com.bibek.chatapplication.presentation.theme.AppGray
 
+/**
+ * UI composable function representing the main chat screen layout.
+ * It displays the chat messages, input field, and user action row.
+ *
+ * @param uiState The current state of the UI containing chat data.
+ * @param onEvent Lambda function to handle user interactions like message send or leaving chat.
+ */
 @Composable
-fun ChatScreenUI(uiState: SearchState = SearchState(), onEvent: (SearchEvent) -> Unit = {}) {
+fun ChatUI(uiState: SearchState = SearchState(), onEvent: (SearchEvent) -> Unit = {}) {
+    // Collect messages state from the UI state
     val messages by uiState.allChats.collectAsStateWithLifecycle(emptyList())
     val scrollState = rememberLazyListState()
+
+    // Scaffold for main layout, including top bar with user action row
     Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
         UserActionRow(name = uiState.matchUsername, onClick = {
             onEvent(SearchEvent.OnLeaveChatClick)
         })
     }) { innerPadding ->
+        // Main content Box for chat and input section
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -72,6 +82,7 @@ fun ChatScreenUI(uiState: SearchState = SearchState(), onEvent: (SearchEvent) ->
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Column {
+                    // LazyColumn for displaying messages
                     LazyColumn(
                         reverseLayout = true,
                         state = scrollState,
@@ -83,6 +94,7 @@ fun ChatScreenUI(uiState: SearchState = SearchState(), onEvent: (SearchEvent) ->
                         }
                         messages.reversed().forEachIndexed { index, messageEntity ->
                             item(messageEntity.id) {
+                                // Conditional rendering for received or sent messages
                                 if (!messageEntity.message.isNullOrEmpty()) {
                                     if (messageEntity.userName != uiState.username) {
                                         ReceivedMessage(
@@ -102,6 +114,7 @@ fun ChatScreenUI(uiState: SearchState = SearchState(), onEvent: (SearchEvent) ->
                     }
                 }
             }
+            // Input and send message row at the bottom of the screen
             Row(modifier = Modifier.padding(horizontal = 10.dp)) {
                 Row(
                     modifier = Modifier
@@ -111,6 +124,7 @@ fun ChatScreenUI(uiState: SearchState = SearchState(), onEvent: (SearchEvent) ->
                         .padding(horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Message input field
                     TextField(
                         value = uiState.currentMessage,
                         onValueChange = {
@@ -137,6 +151,7 @@ fun ChatScreenUI(uiState: SearchState = SearchState(), onEvent: (SearchEvent) ->
                         )
                     )
                     Spacer(modifier = Modifier.width(2.dp))
+                    // Send button
                     Image(
                         painter = painterResource(R.drawable.ic_send),
                         contentDescription = "Send Icon",
@@ -153,7 +168,12 @@ fun ChatScreenUI(uiState: SearchState = SearchState(), onEvent: (SearchEvent) ->
     }
 }
 
-
+/**
+ * Composable function to display the row of user actions at the top of the chat screen.
+ *
+ * @param name The name of the user in the chat.
+ * @param onClick Lambda function triggered when user interacts with the back button.
+ */
 @Preview
 @Composable
 fun UserActionRow(name: String = "", onClick: () -> Unit = {}) {
@@ -164,7 +184,7 @@ fun UserActionRow(name: String = "", onClick: () -> Unit = {}) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Row of icons with text
+        // Row of icons with text (refresh, report, add)
         Row(
             horizontalArrangement = Arrangement.Start,
             modifier = Modifier.weight(1f)
@@ -191,8 +211,9 @@ fun UserActionRow(name: String = "", onClick: () -> Unit = {}) {
                 modifier = Modifier.padding(end = 8.dp)
             )
             Row(modifier = Modifier.bounceClick(onClick)) {
+                // Avatar icon
                 Icon(
-                    imageVector = Icons.Default.AccountCircle, // Avatar icon
+                    imageVector = Icons.Default.AccountCircle,
                     contentDescription = "Avatar",
                     tint = Color.Gray,
                     modifier = Modifier
@@ -202,8 +223,9 @@ fun UserActionRow(name: String = "", onClick: () -> Unit = {}) {
                         .background(Color.LightGray)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
+                // Back button icon
                 Icon(
-                    painter = painterResource(R.drawable.ic_back_right), // Avatar icon
+                    painter = painterResource(R.drawable.ic_back_right),
                     contentDescription = "Avatar",
                     tint = AppGray,
                     modifier = Modifier
@@ -214,4 +236,3 @@ fun UserActionRow(name: String = "", onClick: () -> Unit = {}) {
         }
     }
 }
-

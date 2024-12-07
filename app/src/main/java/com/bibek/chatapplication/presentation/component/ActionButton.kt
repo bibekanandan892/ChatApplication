@@ -12,6 +12,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * A composable function that creates a customizable action button.
+ *
+ * This button is designed to be used for various actions in the UI, with
+ * customization options for the button text, background color, and the
+ * click action. It is styled with a circular shape and a fixed size.
+ *
+ * @param text The text to be displayed inside the button.
+ * @param backgroundColor The background color of the button.
+ * @param onClick A lambda function to be executed when the button is clicked.
+ * By default, this is an empty lambda that does nothing.
+ */
 @Composable
 fun ActionButton(text: String, backgroundColor: Color, onClick: () -> Unit = {}) {
     Button(

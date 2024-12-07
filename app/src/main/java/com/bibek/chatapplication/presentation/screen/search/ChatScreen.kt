@@ -27,31 +27,51 @@ import com.bibek.chatapplication.R
 import com.bibek.chatapplication.presentation.component.ActionButton
 import com.bibek.chatapplication.presentation.component.ExitChatDialog
 import com.bibek.chatapplication.presentation.component.TabItem
-import com.bibek.chatapplication.presentation.screen.chat.ChatScreenUI
+import com.bibek.chatapplication.presentation.screen.chat.ChatUI
 import com.bibek.chatapplication.presentation.theme.DarkGray
 import com.bibek.chatapplication.presentation.theme.LightGray
 import com.bibek.chatapplication.presentation.theme.Primary
 
+/**
+ * Represents the main ChatScreen UI for the app.
+ * It displays the chat interface or search interface based on the state.
+ * Handles back navigation and shows an exit chat dialog.
+ *
+ * @param uiState The current state of the Search screen.
+ * @param onEvent A lambda function to handle the events triggered in this screen.
+ */
 @Composable
 fun ChatScreen(
     uiState: SearchState, onEvent: (SearchEvent) -> Unit = {}
 ) {
+    // Handle back press event
     BackHandler {
         onEvent(SearchEvent.OnBackClick)
     }
+
+    // Show exit chat confirmation dialog if required
     ExitChatDialog(showDialog = uiState.isShowDialog,
         onConfirm = {
             onEvent(SearchEvent.OnLeaveChatClick)
         }, onDismiss = {
             onEvent(SearchEvent.OnDialogDismissClick)
         })
+
+    // Display either the ChatUI or SearchScreen based on the chat state
     if (uiState.chatState == ChatState.Accepted) {
-        ChatScreenUI(uiState = uiState, onEvent = onEvent)
+        ChatUI(uiState = uiState, onEvent = onEvent)
     } else {
         SearchScreen(uiState = uiState, onEvent = onEvent)
     }
 }
 
+/**
+ * Displays the search screen UI, including tabs for gender selection, profile matching state, and gem count.
+ * Shows either a loading state or a searched profile based on the current state.
+ *
+ * @param uiState The current state of the Search screen.
+ * @param onEvent A lambda function to handle the events triggered in this screen.
+ */
 @Composable
 fun SearchScreen(uiState: SearchState, onEvent: (SearchEvent) -> Unit = {}) {
     Column(
@@ -62,7 +82,7 @@ fun SearchScreen(uiState: SearchState, onEvent: (SearchEvent) -> Unit = {}) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceAround
     ) {
-        // Top Tabs
+        // Gender Selection Tabs
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -74,7 +94,8 @@ fun SearchScreen(uiState: SearchState, onEvent: (SearchEvent) -> Unit = {}) {
             TabItem(text = "أنثى", isSelected = true)
             TabItem(text = "ذكر", isSelected = false)
         }
-        // Profile Image with Progress
+
+        // Profile section with loading or actual profile based on the state
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -97,7 +118,8 @@ fun SearchScreen(uiState: SearchState, onEvent: (SearchEvent) -> Unit = {}) {
                     })
             }
         }
-        // Gems Count
+
+        // Gems count section
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -132,6 +154,10 @@ fun SearchScreen(uiState: SearchState, onEvent: (SearchEvent) -> Unit = {}) {
     }
 }
 
+/**
+ * Displays a loading state with a circular progress indicator and a placeholder profile image.
+ * This is shown while waiting for a match.
+ */
 @Composable
 private fun SearchedProfileLoading() {
     Box(
@@ -150,7 +176,6 @@ private fun SearchedProfileLoading() {
                 .size(120.dp),
             color = Color.Gray // Placeholder background
         ) {
-            // Replace with an image painter for real image
             BasicText(
                 text = "",
                 modifier = Modifier.fillMaxSize()
@@ -167,6 +192,15 @@ private fun SearchedProfileLoading() {
     )
 }
 
+/**
+ * Displays the profile of a matched user with action buttons (accept, transcend).
+ * Allows the user to accept the match or request a rematch.
+ *
+ * @param isRequestedForAccepted A boolean indicating whether the user has requested to accept the match.
+ * @param username The username of the matched profile.
+ * @param onTranscendClick Callback to be triggered when the user clicks on the "Transcend" button (request rematch).
+ * @param onOkClick Callback to be triggered when the user clicks on the "OK" button (accept the match).
+ */
 @Composable
 private fun SearchedProfile(
     isRequestedForAccepted: Boolean,
@@ -221,6 +255,7 @@ private fun SearchedProfile(
             fontSize = 16.sp
         )
     }
+
     // Action Buttons
     Row(
         modifier = Modifier
@@ -237,4 +272,3 @@ private fun SearchedProfile(
     }
     Spacer(modifier = Modifier.height(40.dp))
 }
-
