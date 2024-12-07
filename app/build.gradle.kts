@@ -103,13 +103,6 @@ dependencies {
     //coil
     implementation(libs.coil)
 
-    //retrofit
-    implementation(libs.okkhttp)
-    implementation(libs.retrofit2.kotlin.coroutines.adapter)
-    implementation(libs.retrofit)
-    implementation(libs.converter.gson)
-    implementation(libs.converter.moshi)
-    implementation(libs.converter.scalars)
     //data store
     implementation (libs.androidx.datastore.preferences)
     // Message Bar Compose
