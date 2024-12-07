@@ -15,6 +15,15 @@ import com.bibek.chatapplication.presentation.screen.signup.SignupScreen
 import com.bibek.chatapplication.presentation.screen.signup.SignupViewmodel
 import com.bibek.chatapplication.presentation.screen.splash.SplashScreen
 
+/**
+ * Configures the navigation graph for the application.
+ *
+ * Defines the navigation routes and associates them with their respective composable screens.
+ * Each screen has access to its corresponding ViewModel for state management.
+ *
+ * @param startDestination The initial destination route of the navigation graph.
+ * @param navController The navigation controller to manage app navigation.
+ */
 @Composable
 fun SetupNavGraph(
     startDestination: String,
@@ -24,24 +33,27 @@ fun SetupNavGraph(
         navController = navController,
         startDestination = startDestination,
     ) {
+        // Splash screen route
         composable(route = Destination.SLASH.name) {
             SplashScreen()
         }
+
+        // Signup screen route
         composable(route = Destination.SIGNUP.name) {
             val signupViewmodel: SignupViewmodel = hiltViewModel()
             val uiState by signupViewmodel.uiState.collectAsState()
             SignupScreen(uiState = uiState, signupViewmodel::onEvent)
         }
-        composable(
-            route = Destination.HOME.name,
-        ) {
+
+        // Home screen route
+        composable(route = Destination.HOME.name) {
             val homeViewmodel: HomeViewmodel = hiltViewModel()
             val uiState by homeViewmodel.uiState.collectAsState()
             HomeScreen(uiState = uiState, onEvent = homeViewmodel::onEvent)
         }
-        composable(
-            route = Destination.SEARCH.name
-        ) { backStackEntry ->
+
+        // Search/Chat screen route
+        composable(route = Destination.SEARCH.name) { backStackEntry ->
             val searchViewModel: SearchViewModel = hiltViewModel()
             val uiState by searchViewModel.uiState.collectAsState()
             ChatScreen(uiState = uiState, onEvent = searchViewModel::onEvent)

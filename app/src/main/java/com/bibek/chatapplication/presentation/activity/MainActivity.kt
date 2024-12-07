@@ -28,46 +28,66 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
+/**
+ * The main entry point of the application. This activity is responsible for setting up the Compose UI,
+ * managing navigation, observing connectivity status, and displaying error/success messages.
+ */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    /**
+     * Injected navigator to handle navigation actions.
+     */
     @Inject
     lateinit var navigator: Navigator
 
+    /**
+     * Injected toaster to handle displaying error and success messages.
+     */
     @Inject
     lateinit var toaster: Toaster
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            // Set up navigation controller for the navigation graph
             val navGraphController = rememberNavController()
             val mainViewModel: MainViewModel = hiltViewModel()
             val messageBar = rememberMessageBarState()
             val isConnectivityAvailable = mainViewModel.isConnectivityAvailable
+
+            // Initialize navigation setup
             LaunchedEffect(key1 = true) {
                 navigationSetup(navGraphController)
             }
+
+            // Scaffold to provide consistent layout structure
             Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
                 ) {
+                    // Display connectivity status based on the observed state
                     isConnectivityAvailable.value?.let {
                         ConnectivityStatus(it)
                     }
-                    // Observes error messages and displays them using a custom message bar UI component
+
+                    // Observe and display error messages using a custom message bar
                     LaunchedEffect(key1 = true) {
                         toaster.errorFlow.collect {
                             messageBar.addError(it)
                         }
                     }
-                    // Observes success messages and displays them using a custom message bar UI component
+
+                    // Observe and display success messages using a custom message bar
                     LaunchedEffect(key1 = true) {
                         toaster.successFlow.collect {
                             messageBar.addSuccess(it)
                         }
                     }
+
+                    // Wrapper for displaying messages and setting up the navigation graph
                     ContentWithMessageBar(
                         messageBarState = messageBar,
                         successContainerColor = Primary,
@@ -75,7 +95,8 @@ class MainActivity : ComponentActivity() {
                         errorContainerColor = Color.Red,
                         errorContentColor = Color.White,
                         isEnableCopy = false,
-                        lottieResource = R.raw.kotak_loading, position = MessageBarPosition.TOP
+                        lottieResource = R.raw.kotak_loading,
+                        position = MessageBarPosition.TOP
                     ) {
                         SetupNavGraph(
                             startDestination = mainViewModel.startDestination.value.name,
@@ -87,16 +108,24 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Sets up navigation actions and observes them for changes.
+     *
+     * @param navGraphController The navigation controller for managing the back stack and navigation actions.
+     */
     private fun navigationSetup(navGraphController: NavHostController) {
         navigator.actions.onEach { action ->
             when (action) {
+                // Handle back navigation
                 Navigator.Action.Back -> {
                     navGraphController.popBackStack()
                 }
+                // Handle navigation to a specific destination
                 is Navigator.Action.Navigate -> {
                     if (navGraphController.currentDestination?.route != action.destination) {
                         navGraphController.navigate(
-                            route = action.destination, builder = action.navOptions
+                            route = action.destination,
+                            builder = action.navOptions
                         )
                     }
                 }
@@ -104,3 +133,4 @@ class MainActivity : ComponentActivity() {
         }.launchIn(lifecycleScope)
     }
 }
+

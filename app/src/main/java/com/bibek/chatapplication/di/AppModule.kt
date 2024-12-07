@@ -39,18 +39,39 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
+    /**
+     * Provides a singleton instance of [ConnectivityObserver] for monitoring network connectivity changes.
+     *
+     * @param context The application context.
+     * @return An instance of [ConnectivityObserverImpl].
+     */
     @Singleton
     @Provides
     fun provideConnectivityObserver(@ApplicationContext context: Context): ConnectivityObserver {
         return ConnectivityObserverImpl(context.connectivityManager)
     }
 
+    /**
+     * Provides a singleton instance of [OkHttpClient] for HTTP operations.
+     *
+     * @return An instance of [OkHttpClient].
+     */
     @Singleton
     @Provides
     fun provideOkHttp(): OkHttpClient {
         return OkHttpClient()
     }
 
+    /**
+     * Provides a singleton instance of [Repository] for managing application data and operations.
+     *
+     * @param websocketClient The WebSocket client for real-time communication.
+     * @param chatMessageDao DAO for managing chat messages in the local database.
+     * @param failedMessageDao DAO for managing failed messages in the local database.
+     * @param httpClient The HTTP client for making API requests.
+     * @param appDataStore The DataStore for saving and retrieving persistent data.
+     * @return An instance of [RepositoryImpl].
+     */
     @Singleton
     @Provides
     fun provideRepository(
@@ -66,16 +87,26 @@ object AppModule {
             failedMessageDao = failedMessageDao,
             httpClient = httpClient,
             appDataStore = appDataStore,
-
         )
     }
 
+    /**
+     * Provides a singleton instance of [Json] configured for kotlinx.serialization.
+     *
+     * @return A configured instance of [Json].
+     */
     @Singleton
     @Provides
     fun provideJson() = Json {
         ignoreUnknownKeys = true
     }
 
+    /**
+     * Provides a singleton instance of [ChatMessageDatabase] for managing local database operations.
+     *
+     * @param context The application context.
+     * @return An instance of [ChatMessageDatabase].
+     */
     @Singleton
     @Provides
     fun provideChatMessageDataBase(@ApplicationContext context: Context): ChatMessageDatabase =
@@ -87,6 +118,11 @@ object AppModule {
             .fallbackToDestructiveMigration()
             .build()
 
+    /**
+     * Provides a singleton instance of [HttpClient] configured with OkHttp and additional plugins.
+     *
+     * @return A configured instance of [HttpClient].
+     */
     @Singleton
     @Provides
     fun provideHttpClient(): HttpClient {
@@ -115,20 +151,37 @@ object AppModule {
         }
     }
 
+    /**
+     * Provides a singleton instance of [ChatMessageDao] for managing chat messages in the database.
+     *
+     * @param chatMessageDatabase The [ChatMessageDatabase] instance.
+     * @return An instance of [ChatMessageDao].
+     */
     @Singleton
     @Provides
     fun provideChatMessageDao(chatMessageDatabase: ChatMessageDatabase): ChatMessageDao =
         chatMessageDatabase.chatMessageDao()
 
+    /**
+     * Provides a singleton instance of [FailedMessageDao] for managing failed messages in the database.
+     *
+     * @param chatMessageDatabase The [ChatMessageDatabase] instance.
+     * @return An instance of [FailedMessageDao].
+     */
     @Singleton
     @Provides
     fun providesFailedMessageDao(chatMessageDatabase: ChatMessageDatabase): FailedMessageDao =
         chatMessageDatabase.failedMessageDao()
 
+    /**
+     * Provides a singleton instance of [AppDataStore] for managing persistent data storage.
+     *
+     * @param context The application context.
+     * @return An instance of [AppDateStoreImpl].
+     */
     @Singleton
     @Provides
     fun provideAppDataStore(@ApplicationContext context: Context): AppDataStore {
         return AppDateStoreImpl(context = context)
     }
-
 }
