@@ -12,8 +12,13 @@ import com.bibek.chatapplication.data.model.chat.toChatMessage
 import com.bibek.chatapplication.data.remote.WebsocketClient
 import com.bibek.chatapplication.domain.repository.Repository
 import com.bibek.chatapplication.utils.AUTHORIZATION
+import com.bibek.chatapplication.utils.AUTH_ENDPOINT
+import com.bibek.chatapplication.utils.BASE_URL
 import com.bibek.chatapplication.utils.CONTENT_TYPE
+import com.bibek.chatapplication.utils.DEVICE_ID_PARAM
 import com.bibek.chatapplication.utils.SocketEvent
+import com.bibek.chatapplication.utils.TOKEN_PARAM
+import com.bibek.chatapplication.utils.UDID_PARAM
 import com.bibek.chatapplication.utils.USER_AGENT
 import com.bibek.chatapplication.utils.X_SESSION_ID
 import io.ktor.client.HttpClient
@@ -50,7 +55,6 @@ class RepositoryImpl(
         )
     }
 
-
     override fun sendEvent(
         event: SocketEvent,
         text: String
@@ -69,16 +73,19 @@ class RepositoryImpl(
         request: AuthRequest
     ): Flow<AuthResponse> {
         return flow {
-            val response =
-                httpClient.put(urlString = "https://dev.wefaaq.net/api/@fadfedx/auth?udid=$udid&devid=$deviceId&token=$token") {
-                    headers {
-                        header(USER_AGENT, userAgent)
-                        header(CONTENT_TYPE, contentType)
-                        header(X_SESSION_ID, sessionId)
-                        header(AUTHORIZATION, authorization)
-                    }
-                    setBody(request)
-                }.body<AuthResponse>()
+            val url = "${BASE_URL}${AUTH_ENDPOINT}?" +
+                    "${UDID_PARAM}=$udid&" +
+                    "${DEVICE_ID_PARAM}=$deviceId&" +
+                    "${TOKEN_PARAM}=$token"
+            val response = httpClient.put(urlString = url) {
+                headers {
+                    header(USER_AGENT, userAgent)
+                    header(CONTENT_TYPE, contentType)
+                    header(X_SESSION_ID, sessionId)
+                    header(AUTHORIZATION, authorization)
+                }
+                setBody(request)
+            }.body<AuthResponse>()
             emit(response)
         }
     }

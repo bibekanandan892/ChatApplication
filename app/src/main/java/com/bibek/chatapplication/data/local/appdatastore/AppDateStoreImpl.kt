@@ -22,6 +22,7 @@ import java.io.IOException
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
     name = PREFERENCES_NAME
 )
+
 class AppDateStoreImpl(context: Context) : AppDataStore {
 
     private val dataStore = context.dataStore
@@ -35,84 +36,47 @@ class AppDateStoreImpl(context: Context) : AppDataStore {
     }
 
     override suspend fun saveUdidName(udidName: String) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKey.udidNameKey] = udidName
-        }
+        savePreference(PreferencesKey.udidNameKey, udidName)
     }
 
     override suspend fun savePassword(password: String) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKey.passwordKey] = password
-        }
+        savePreference(PreferencesKey.passwordKey, password)
     }
 
     override suspend fun saveAuth(auth: String) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKey.authKey] = auth
-        }
+        savePreference(PreferencesKey.authKey, auth)
     }
 
     override suspend fun saveDeviceId(deviceId: String) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKey.deviceIdKey] = deviceId
-        }
+        savePreference(PreferencesKey.deviceIdKey, deviceId)
     }
 
     override suspend fun saveToken(token: String) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKey.tokenKey] = token
-        }
+        savePreference(PreferencesKey.tokenKey, token)
     }
 
+
     override fun getAuth(): Flow<String?> {
-        return dataStore.data.catch { exception ->
-            if (exception is IOException) {
-                emit(emptyPreferences())
-            } else {
-                throw exception
-            }
-        }.map { preferences ->
-            preferences[PreferencesKey.authKey]
-        }
+        return getPreference(PreferencesKey.authKey)
     }
 
     override fun getUdidName(): Flow<String?> {
-        return dataStore.data.catch { exception ->
-            if (exception is IOException) {
-                emit(emptyPreferences())
-            } else {
-                throw exception
-            }
-        }.map { preferences ->
-            preferences[PreferencesKey.udidNameKey]
-        }
+        return getPreference(PreferencesKey.udidNameKey)
     }
 
     override fun getPassword(): Flow<String?> {
-        return dataStore.data.catch { exception ->
-            if (exception is IOException) {
-                emit(emptyPreferences())
-            } else {
-                throw exception
-            }
-        }.map { preferences ->
-            preferences[PreferencesKey.passwordKey]
-        }
+        return getPreference(PreferencesKey.passwordKey)
     }
 
     override fun getDeviceId(): Flow<String?> {
-        return dataStore.data.catch { exception ->
-            if (exception is IOException) {
-                emit(emptyPreferences())
-            } else {
-                throw exception
-            }
-        }.map { preferences ->
-            preferences[PreferencesKey.deviceIdKey]
-        }
+        return getPreference(PreferencesKey.deviceIdKey)
     }
 
     override fun getToken(): Flow<String?> {
+        return return getPreference(PreferencesKey.tokenKey)
+    }
+
+    private fun <T> getPreference(key: Preferences.Key<T>): Flow<T?> {
         return dataStore.data.catch { exception ->
             if (exception is IOException) {
                 emit(emptyPreferences())
@@ -120,7 +84,12 @@ class AppDateStoreImpl(context: Context) : AppDataStore {
                 throw exception
             }
         }.map { preferences ->
-            preferences[PreferencesKey.tokenKey]
+            preferences[key]
+        }
+    }
+    private suspend fun <T> savePreference(key: Preferences.Key<T>, value: T) {
+        dataStore.edit { preferences ->
+            preferences[key] = value
         }
     }
 }

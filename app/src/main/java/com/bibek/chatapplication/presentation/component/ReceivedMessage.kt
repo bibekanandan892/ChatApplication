@@ -49,8 +49,7 @@ fun ReceivedMessage(message: String, time: String) {
             ) {
                 Column {
                     Text(text = message, color = Color.Black)
-
-                    Spacer(modifier = Modifier.height(4.dp)) // Add spacing between message and time/status
+                    Spacer(modifier = Modifier.height(4.dp))
                     Row(
                         modifier = Modifier.padding(start = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -59,7 +58,6 @@ fun ReceivedMessage(message: String, time: String) {
                     }
                 }
             }
-
         }
     }
 }

@@ -180,7 +180,7 @@ private fun SearchedProfile(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.TopStart
     ) {
-        IconButton(onClick = { /* TODO: Handle report action */ }) {
+        IconButton(onClick = { }) {
             Icon(
                 painter = painterResource(R.drawable.ic_chat_cloud), // Replace with your custom "Report" icon
                 contentDescription = "Report",

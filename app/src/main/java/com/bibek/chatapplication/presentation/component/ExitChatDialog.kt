@@ -19,7 +19,7 @@ fun ExitChatDialog(
     showDialog: Boolean,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
-    message : String = "Are you sure you want to leave?"
+    message: String = "Are you sure you want to leave?"
 ) {
     if (showDialog) {
         Dialog(
@@ -41,7 +41,7 @@ fun ExitChatDialog(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         TextButton(onClick = onDismiss) {
-                           Text(text = "Cancel")
+                            Text(text = "Cancel")
                         }
                         Spacer(modifier = Modifier.width(16.dp))
                         TextButton(onClick = {

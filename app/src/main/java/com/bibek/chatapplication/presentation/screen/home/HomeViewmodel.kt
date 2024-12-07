@@ -47,7 +47,6 @@ class HomeViewmodel @Inject constructor(
                         )
                     }
                 }
-
                 is HomeEvent.OnGenderSelect -> _uiState.update { uiState -> uiState.copy(preferGender = event.gender) }
                 HomeEvent.NavigateToSearch -> {
                     if (uiState.value.preferGender == null) {

@@ -125,7 +125,6 @@ object AppModule {
     fun providesFailedMessageDao(chatMessageDatabase: ChatMessageDatabase): FailedMessageDao =
         chatMessageDatabase.failedMessageDao()
 
-    // Provides a singleton instance of AppDataStore
     @Singleton
     @Provides
     fun provideAppDataStore(@ApplicationContext context: Context): AppDataStore {

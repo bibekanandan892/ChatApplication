@@ -1,7 +1,17 @@
 package com.bibek.chatapplication.data.remote
 
+import com.bibek.chatapplication.utils.AUTH_PARAM
+import com.bibek.chatapplication.utils.DEVICE_ID_PARAM
+import com.bibek.chatapplication.utils.ENDPOINT
+import com.bibek.chatapplication.utils.SEC_WEBSOCKET_PROTOCOL_HEADER
+import com.bibek.chatapplication.utils.SEC_WEBSOCKET_PROTOCOL_VALUE
+import com.bibek.chatapplication.utils.SESSION_ID_PARAM
 import com.bibek.chatapplication.utils.SocketEvent
-import com.bibek.chatapplication.utils.logger.Logger
+import com.bibek.chatapplication.utils.TOKEN_PARAM
+import com.bibek.chatapplication.utils.UDID_PARAM
+import com.bibek.chatapplication.utils.USER_AGENT_HEADER
+import com.bibek.chatapplication.utils.USER_AGENT_VALUE
+import com.bibek.chatapplication.utils.WEBSOCKET_BASE_URL
 import com.bibek.chatapplication.utils.message.createSocketMessageString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,6 +39,7 @@ class WebsocketClient @Inject constructor(
     private var ws: WebSocket? = null
     private val _websocketEventFlow = MutableSharedFlow<String>()
     val websocketEventFlow: SharedFlow<String> = _websocketEventFlow
+
     private var websocketConnectJob: Job? = null
     fun connect(
         sessionId: String?,
@@ -37,60 +48,48 @@ class WebsocketClient @Inject constructor(
         auth: String?,
         udid: String?
     ) {
-        Logger.log("connect() called with parameters:")
-        Logger.log("sessionId: $sessionId")
-        Logger.log("deviceId: $deviceId")
-        Logger.log("token: $token")
-        Logger.log("auth: $auth")
-        Logger.log("udid: $udid")
         websocketConnectJob = launch {
+            val url = "${WEBSOCKET_BASE_URL}/${ENDPOINT}?" +
+                    "${SESSION_ID_PARAM}=$sessionId&" +
+                    "${DEVICE_ID_PARAM}=$deviceId&" +
+                    "${TOKEN_PARAM}=$token&" +
+                    "${AUTH_PARAM}=$auth&" +
+                    "${UDID_PARAM}=$udid"
+
             val request = Request
                 .Builder()
-                .url("wss://dev.wefaaq.net/@fadfedx?session-id=$sessionId&devid=$deviceId&token=$token&auth=$auth&udid=$udid")
-                .addHeader("User-Agent", "FadFed/2.4.3(iOS/15.4)")
-                .addHeader("Sec-Websocket-Protocol", "v2.fadfedly.com")
+                .url(url)
+                .addHeader(USER_AGENT_HEADER, USER_AGENT_VALUE)
+                .addHeader(SEC_WEBSOCKET_PROTOCOL_HEADER, SEC_WEBSOCKET_PROTOCOL_VALUE)
                 .build()
             ws = client.newWebSocket(request, ChatWebSocketListener())
         }
     }
 
     fun sendEvent(event: SocketEvent, text: String) {
-        Logger.log("send event ${event.route} -> $text")
         ws?.send(createSocketMessageString(event = event, text = text))
     }
 
     private inner class ChatWebSocketListener : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
-            Logger.log(
-                message = SocketEvent.OnOpen.route
-            )
             launch {
                 _websocketEventFlow.emit(SocketEvent.OnOpen.route)
             }
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
-            Logger.log(
-                message = text
-            )
             launch {
                 _websocketEventFlow.emit(text)
             }
         }
 
         override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-            Logger.log(
-                message = SocketEvent.OnClosing.route
-            )
             launch {
                 _websocketEventFlow.emit(SocketEvent.OnClosing.route)
             }
         }
 
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-            Logger.log(
-                message = SocketEvent.OnClosed.route
-            )
             launch {
                 _websocketEventFlow.emit(SocketEvent.OnClosed.route)
             }
@@ -100,9 +99,6 @@ class WebsocketClient @Inject constructor(
             launch {
                 _websocketEventFlow.emit(SocketEvent.OnFailure.route + t.message + "]")
             }
-            Logger.log(
-                message = t.message.toString()
-            )
         }
     }
 

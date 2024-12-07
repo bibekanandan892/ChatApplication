@@ -12,6 +12,7 @@ import com.bibek.chatapplication.data.model.websocket.response.ack.AckResponseLo
 import com.bibek.chatapplication.data.model.websocket.response.ack.AckResponseString
 import com.bibek.chatapplication.data.model.websocket.response.matched.MatchedResponse
 import com.bibek.chatapplication.domain.repository.Repository
+import com.bibek.chatapplication.utils.READ
 import com.bibek.chatapplication.utils.SocketEvent
 import com.bibek.chatapplication.utils.connectivity.ConnectionState
 import com.bibek.chatapplication.utils.connectivity.ConnectivityObserver
@@ -51,8 +52,10 @@ class SearchViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(SearchState(allChats = repository.getAllChatMessage()))
     val uiState get() = _uiState.asStateFlow()
+
     private val _eventFlow = MutableSharedFlow<SearchEvent>(extraBufferCapacity = 10)
     val eventFlow get() = _eventFlow.asSharedFlow()
+
     private val websocketState = MutableStateFlow<WebSocketState>(WebSocketState.Disconnected)
 
     init {
@@ -91,10 +94,7 @@ class SearchViewModel @Inject constructor(
             when {
                 response.startsWith(SocketEvent.OnOpen.route) -> handleOnOpenEvent()
                 response.startsWith(SocketEvent.OnClosing.route) -> {}
-                response.startsWith(SocketEvent.OnClosed.route) -> {
-                    websocketState.update { WebSocketState.Disconnected }
-                }
-                response.startsWith(SocketEvent.OnFailure.route) -> {
+                response.startsWith(SocketEvent.OnClosed.route) || response.startsWith(SocketEvent.OnFailure.route) -> {
                     websocketState.update { WebSocketState.Disconnected }
                 }
                 response.startsWith(SocketEvent.Session.route, true) -> {}
@@ -103,66 +103,80 @@ class SearchViewModel @Inject constructor(
                 response.startsWith(SocketEvent.Sync.route, true) -> {}
                 response.startsWith(SocketEvent.Leave.route, true) -> reMatch()
                 response.startsWith(SocketEvent.Message.route, true) -> handleMessageEvent(response)
-                response.startsWith(SocketEvent.Ack.route, true) -> {
-                    val ack =
-                        extractJsonContent(socketEvent = SocketEvent.Ack, text = response)
-                    try {
-                        val ackResponse = json.decodeFromString<AckResponseString>(ack)
-                        ackResponse.apply {
-                            if (!ref.isNullOrEmpty() && !status.isNullOrEmpty()) {
-                                repository.updateStatusById(
-                                    messageId = ref,
-                                    newStatus = status
-                                )
-                            } else if (!ref.isNullOrEmpty()) {
-                                repository.updateStatusById(
-                                    messageId = ref,
-                                    newStatus = Message.Sent.status
-                                )
-                            }
-                        }
-                    } catch (_: Exception) {
-                    }
-
-                }
-
-                response.startsWith(SocketEvent.Type.route, true) -> {
-                }
-
-                response.startsWith(SocketEvent.Seen.route, true) -> {
-                    val sent = extractJsonContent(socketEvent = SocketEvent.Seen, text = response)
-                    var ackResponseLong: AckResponseLong? = null
-                    var ackResponseString: AckResponseString? = null
-                    try {
-                        ackResponseString = json.decodeFromString<AckResponseString>(sent)
-                        ackResponseString.apply {
-                            if (!ref.isNullOrEmpty()) {
-                                repository.updateStatusById(
-                                    messageId = ref,
-                                    newStatus = Message.Sent.status
-                                )
-                            }
-                        }
-                    } catch (_: Exception) {
-                        ackResponseLong = json.decodeFromString<AckResponseLong>(sent)
-                        ackResponseLong.apply {
-                            if (ref != null) {
-                                repository.updateStatusByTs(
-                                    messageTs = ref,
-                                    newStatus = Message.Sent.status
-                                )
-                            }
-                        }
-                    }
-                    delay(1000)
-                }
-
-                else -> {
-                    Logger.log(message = "Received unknown command: $response")
-                }
+                response.startsWith(SocketEvent.Ack.route, true) -> handleAckEvent(response)
+                response.startsWith(SocketEvent.Type.route, true) -> {}
+                response.startsWith(SocketEvent.Seen.route, true) -> handleSeenEvent(response)
+                else -> Logger.log(message = "Received unknown command: $response")
             }
         }
             .launchIn(viewModelScope)
+    }
+    fun onEvent(event: SearchEvent) {
+        _eventFlow.tryEmit(event)
+    }
+
+    fun collectEvents() {
+        eventFlow.onEach { event ->
+            when (event) {
+                SearchEvent.OnRematchClick -> reMatch()
+                SearchEvent.OnAcceptClick -> handleAcceptClick()
+                SearchEvent.SendMessage -> handleSendMessageClick()
+                is SearchEvent.OnCurrentMessageChange -> handleCurrentMessageChange(event)
+                SearchEvent.OnLeaveChatClick -> handleLeaveChatClick()
+                SearchEvent.OnBackClick -> handleBackClick()
+                SearchEvent.OnDialogDismissClick -> dismissDialog()
+                else -> {}
+            }
+        }.launchIn(viewModelScope)
+    }
+    private suspend fun handleSeenEvent(response: String) {
+        val sent = extractJsonContent(socketEvent = SocketEvent.Seen, text = response)
+        var ackResponseLong: AckResponseLong? = null
+        var ackResponseString: AckResponseString? = null
+        try {
+            ackResponseString = json.decodeFromString<AckResponseString>(sent)
+            ackResponseString.apply {
+                if (!ref.isNullOrEmpty()) {
+                    repository.updateStatusById(
+                        messageId = ref,
+                        newStatus = Message.Sent.status
+                    )
+                }
+            }
+        } catch (_: Exception) {
+            ackResponseLong = json.decodeFromString<AckResponseLong>(sent)
+            ackResponseLong.apply {
+                if (ref != null) {
+                    repository.updateStatusByTs(
+                        messageTs = ref,
+                        newStatus = Message.Sent.status
+                    )
+                }
+            }
+        }
+        delay(1000)
+    }
+
+    private suspend fun handleAckEvent(response: String) {
+        val ack =
+            extractJsonContent(socketEvent = SocketEvent.Ack, text = response)
+        try {
+            val ackResponse = json.decodeFromString<AckResponseString>(ack)
+            ackResponse.apply {
+                if (!ref.isNullOrEmpty() && !status.isNullOrEmpty()) {
+                    repository.updateStatusById(
+                        messageId = ref,
+                        newStatus = status
+                    )
+                } else if (!ref.isNullOrEmpty()) {
+                    repository.updateStatusById(
+                        messageId = ref,
+                        newStatus = Message.Sent.status
+                    )
+                }
+            }
+        } catch (_: Exception) {
+        }
     }
 
     private suspend fun handleMessageEvent(response: String) {
@@ -182,7 +196,7 @@ class SearchViewModel @Inject constructor(
         val ackRequest = AckRequest(
             id = System.currentTimeMillis(),
             ref = messageResponse.id,
-            status = "read"
+            status = READ
         )
         repository.sendEvent(SocketEvent.Ack, text = json.encodeToString(ackRequest))
     }
@@ -228,89 +242,73 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    fun onEvent(event: SearchEvent) {
-        _eventFlow.tryEmit(event)
+    private fun handleBackClick() {
+        if (uiState.value.chatState == ChatState.Accepted) {
+            _uiState.update { uiState -> uiState.copy(isShowDialog = true) }
+        } else {
+            navigator.back()
+            repository.dispose()
+        }
     }
 
-    fun collectEvents() {
-        eventFlow.onEach { event ->
-            when (event) {
-                SearchEvent.OnRematchClick -> reMatch()
-                SearchEvent.OnAcceptClick -> {
-                    if (!uiState.value.isRequestAccepted) {
-                        _uiState.update { uiState -> uiState.copy(isRequestedForAccepted = true) }
-                    } else {
-                        _uiState.update { uiState -> uiState.copy(chatState = ChatState.Accepted) }
-                    }
-                    clearDb()
-                    val chatIdRequest = ChatIdModel(chatId = uiState.value.chatId)
-                    val chatIdRequestString = json.encodeToString(chatIdRequest)
-                    repository.sendEvent(SocketEvent.Accept, chatIdRequestString)
+    private fun handleLeaveChatClick() {
+        reMatch()
+        dismissDialog()
+    }
+
+    private fun dismissDialog() {
+        _uiState.update { uiState ->
+            uiState.copy(
+                isShowDialog = false
+            )
+        }
+    }
+
+    private fun handleCurrentMessageChange(event: SearchEvent.OnCurrentMessageChange) {
+        _uiState.update { uiState -> uiState.copy(currentMessage = event.value) }
+    }
+
+    private suspend fun handleSendMessageClick() {
+        if (uiState.value.currentMessage.isNotEmpty()) {
+            val sendMessageRequest = SendMessage(
+                content = uiState.value.currentMessage,
+                to = uiState.value.matchUsername,
+                id = UUID.randomUUID().toString(),
+                ts = System.currentTimeMillis()
+            )
+            val requestString = json.encodeToString(sendMessageRequest)
+            repository.insertFailedChat(
+                chatMessageEntity = ChatMessageEntity(
+                    timeMillis = sendMessageRequest.ts ?: 0,
+                    message = sendMessageRequest.content,
+                    userName = uiState.value.username,
+                    chatId = uiState.value.chatId,
+                    status = Message.Sending.status,
+                    id = sendMessageRequest.id
+                )
+            )
+            when (websocketState.value) {
+                WebSocketState.Connected -> {
+                    repository.sendEvent(event = SocketEvent.Send, text = requestString)
                 }
-
-                SearchEvent.SendMessage -> {
-                    if (uiState.value.currentMessage.isNotEmpty()) {
-                        val sendMessageRequest = SendMessage(
-                            content = uiState.value.currentMessage,
-                            to = uiState.value.matchUsername,
-                            id = UUID.randomUUID().toString(),
-                            ts = System.currentTimeMillis()
-                        )
-                        val requestString = json.encodeToString(sendMessageRequest)
-                        repository.insertFailedChat(
-                            chatMessageEntity = ChatMessageEntity(
-                                timeMillis = sendMessageRequest.ts ?: 0,
-                                message = sendMessageRequest.content,
-                                userName = uiState.value.username,
-                                chatId = uiState.value.chatId,
-                                status = Message.Sending.status,
-                                id = sendMessageRequest.id
-                            )
-                        )
-                        when (websocketState.value) {
-                            WebSocketState.Connected -> {
-                                repository.sendEvent(event = SocketEvent.Send, text = requestString)
-                            }
-
-                            WebSocketState.Disconnected -> {
-                                repository.insertFailedChat(sendMessageRequest.toFailedMessage())
-                            }
-                        }
-                        _uiState.update { uiState -> uiState.copy(currentMessage = "") }
-                    }
+                WebSocketState.Disconnected -> {
+                    repository.insertFailedChat(sendMessageRequest.toFailedMessage())
                 }
-
-                is SearchEvent.OnCurrentMessageChange -> {
-                    _uiState.update { uiState -> uiState.copy(currentMessage = event.value) }
-                }
-
-                SearchEvent.OnLeaveChatClick -> {
-                    reMatch()
-                    _uiState.update { uiState ->
-                        uiState.copy(
-                            isShowDialog = false
-                        )
-                    }
-                }
-
-                SearchEvent.OnBackClick -> {
-                    if (uiState.value.chatState == ChatState.Accepted) {
-                        _uiState.update { uiState -> uiState.copy(isShowDialog = true) }
-                    } else {
-                        navigator.back()
-                        repository.dispose()
-                    }
-                }
-
-                SearchEvent.OnDialogDismissClick -> _uiState.update { uiState ->
-                    uiState.copy(
-                        isShowDialog = false
-                    )
-                }
-
-                else -> {}
             }
-        }.launchIn(viewModelScope)
+            _uiState.update { uiState -> uiState.copy(currentMessage = "") }
+        }
+    }
+
+    private fun handleAcceptClick() {
+        if (!uiState.value.isRequestAccepted) {
+            _uiState.update { uiState -> uiState.copy(isRequestedForAccepted = true) }
+        } else {
+            _uiState.update { uiState -> uiState.copy(chatState = ChatState.Accepted) }
+        }
+        clearDb()
+        val chatIdRequest = ChatIdModel(chatId = uiState.value.chatId)
+        val chatIdRequestString = json.encodeToString(chatIdRequest)
+        repository.sendEvent(SocketEvent.Accept, chatIdRequestString)
     }
 
     private fun clearDb() {

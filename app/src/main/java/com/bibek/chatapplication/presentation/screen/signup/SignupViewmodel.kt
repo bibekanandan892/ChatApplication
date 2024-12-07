@@ -7,6 +7,7 @@ import com.bibek.chatapplication.data.model.error.ErrorResponse
 import com.bibek.chatapplication.domain.repository.Repository
 import com.bibek.chatapplication.presentation.navigation.Destination
 import com.bibek.chatapplication.utils.GENERIC_ERROR_MESSAGE
+import com.bibek.chatapplication.utils.USER_AGENT_VALUE
 import com.bibek.chatapplication.utils.generateBasicAuthHeader
 import com.bibek.chatapplication.utils.generateToken
 import com.bibek.chatapplication.utils.navigation.Navigator
@@ -52,24 +53,39 @@ class SignupViewmodel @Inject constructor(
     fun collectEvents() {
         eventFlow.onEach { event ->
             when (event) {
-                is SignupEvent.OnNameChange -> _uiState.update { uiState -> uiState.copy(udid = event.name) }
-
-                is SignupEvent.OnSignupClick -> uiState.value.apply {
-                    if (udid.isEmpty() || udid.length < 8) {
-                        toaster.error("يرجى إدخال اسم صالح")
-                    } else if (gender == null) {
-                        toaster.error("يرجى اختيار الجنس")
-                    } else {
-                        signup(event.deviceId)
-                    }
-                }
-                is SignupEvent.OnGenderSelect -> _uiState.update { uiState ->
-                    uiState.copy(
-                        gender = event.gender
-                    )
-                }
+                is SignupEvent.OnNameChange -> handleNameChange(event)
+                is SignupEvent.OnSignupClick -> handleSignupClick(event)
+                is SignupEvent.OnGenderSelect -> handleGenderClick(event)
             }
         }.launchIn(viewModelScope)
+    }
+
+    private fun handleGenderClick(event: SignupEvent.OnGenderSelect) {
+        _uiState.update { uiState ->
+            uiState.copy(
+                gender = event.gender
+            )
+        }
+    }
+
+    private suspend fun handleSignupClick(event: SignupEvent.OnSignupClick) {
+        uiState.value.apply {
+            if (udid.length < 8) {
+                toaster.error("يرجى إدخال اسم صالح")
+            } else if (gender == null) {
+                toaster.error("يرجى اختيار الجنس")
+            } else {
+                signup(event.deviceId)
+            }
+        }
+    }
+
+    private fun handleNameChange(event: SignupEvent.OnNameChange) {
+        _uiState.update { uiState ->
+            uiState.copy(
+                udid = event.name.filter { it.isLetterOrDigit() }
+            )
+        }
     }
 
     private fun signup(deviceId: String = "") {
@@ -82,7 +98,7 @@ class SignupViewmodel @Inject constructor(
             token = token,
             authorization = authorization,
             sessionId = sessionUUID,
-            userAgent = "FadFed/2.4.3(iOS/15.4)",
+            userAgent = USER_AGENT_VALUE,
             request = AuthRequest(username = uiState.value.udid, password = uiState.value.udid)
         )
             .flowOn(Dispatchers.IO)

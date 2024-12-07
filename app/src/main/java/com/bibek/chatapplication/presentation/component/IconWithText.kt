@@ -24,7 +24,7 @@ fun IconWithText(icon: Painter, label: String, onClick: () -> Unit = {}) {
         Icon(
             painter = icon,
             contentDescription = label,
-            tint = Color(0xFF64B5F6), // Light blue color
+            tint = Color(0xFF64B5F6),
             modifier = Modifier.size(24.dp)
         )
         Text(

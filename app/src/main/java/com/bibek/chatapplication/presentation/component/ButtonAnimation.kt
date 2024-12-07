@@ -1,6 +1,7 @@
 package com.bibek.chatapplication.presentation.component
 
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -17,36 +18,14 @@ import androidx.compose.ui.input.pointer.pointerInput
 
 enum class ButtonStateChange { Pressed, Idle }
 
-enum class ButtonState { Pressed, Idle }
 
-fun Modifier.pressClickEffect() = composed {
-    var buttonState by remember { mutableStateOf(ButtonState.Idle) }
-    val ty by animateFloatAsState(if (buttonState == ButtonState.Pressed) 0f else -20f)
-
-    this
-        .graphicsLayer {
-            translationY = ty
-        }
-        .clickable(interactionSource = remember { MutableInteractionSource() },
-            indication = null,
-            onClick = { })
-        .pointerInput(buttonState) {
-            awaitPointerEventScope {
-                buttonState = if (buttonState == ButtonState.Pressed) {
-                    waitForUpOrCancellation()
-                    ButtonState.Idle
-                } else {
-                    awaitFirstDown(false)
-                    ButtonState.Pressed
-                }
-            }
-        }
-}
-
+@SuppressLint("ReturnFromAwaitPointerEventScope")
 fun Modifier.bounceClick(onClick: () -> Unit) = composed {
     var buttonStateChange by remember { mutableStateOf(ButtonStateChange.Idle) }
 
-    val scale by animateFloatAsState(if (buttonStateChange == ButtonStateChange.Pressed) 0.85f else 1f)
+    val scale by animateFloatAsState(if (buttonStateChange == ButtonStateChange.Pressed) 0.85f else 1f,
+        label = ""
+    )
 
     this
         .graphicsLayer {

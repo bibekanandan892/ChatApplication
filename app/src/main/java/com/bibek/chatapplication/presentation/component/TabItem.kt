@@ -20,7 +20,6 @@ fun TabItem(text: String, isSelected: Boolean) {
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-
         Text(
             text = text,
             color = if (isSelected) Color.White else Color.Gray,
@@ -36,5 +35,4 @@ fun TabItem(text: String, isSelected: Boolean) {
             }, contentDescription = null, Modifier.size(30.dp)
         )
     }
-
 }

@@ -30,6 +30,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
     @Inject
     lateinit var navigator: Navigator
 
@@ -42,13 +43,10 @@ class MainActivity : ComponentActivity() {
             val navGraphController = rememberNavController()
             val mainViewModel: MainViewModel = hiltViewModel()
             val messageBar = rememberMessageBarState()
-
             val isConnectivityAvailable = mainViewModel.isConnectivityAvailable
-
             LaunchedEffect(key1 = true) {
                 navigationSetup(navGraphController)
             }
-
             Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                 Column(
                     modifier = Modifier
@@ -64,7 +62,6 @@ class MainActivity : ComponentActivity() {
                             messageBar.addError(it)
                         }
                     }
-
                     // Observes success messages and displays them using a custom message bar UI component
                     LaunchedEffect(key1 = true) {
                         toaster.successFlow.collect {
@@ -96,7 +93,6 @@ class MainActivity : ComponentActivity() {
                 Navigator.Action.Back -> {
                     navGraphController.popBackStack()
                 }
-
                 is Navigator.Action.Navigate -> {
                     if (navGraphController.currentDestination?.route != action.destination) {
                         navGraphController.navigate(

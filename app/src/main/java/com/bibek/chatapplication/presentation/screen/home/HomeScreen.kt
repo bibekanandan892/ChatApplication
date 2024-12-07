@@ -30,14 +30,12 @@ fun HomeScreen(uiState: HomeState = HomeState(), onEvent: (HomeEvent) -> Unit = 
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Header(text = "ابحث عن صديق")
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             RightAlignText(
                 text = "فضفض مع:", horizontalAlignment = Alignment.CenterHorizontally
             )

@@ -20,8 +20,7 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val connectivityObserver: ConnectivityObserver,
     private val repository: Repository
-) :
-    ViewModel() {
+) : ViewModel() {
     var isConnectivityAvailable: MutableState<ConnectionState?> = mutableStateOf(null)
         private set
     val startDestination = mutableStateOf(Destination.SLASH)
