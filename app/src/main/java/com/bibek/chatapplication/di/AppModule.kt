@@ -14,6 +14,8 @@ import com.bibek.chatapplication.utils.CHAT_MESSAGE_DATABASE
 import com.bibek.chatapplication.utils.connectivity.ConnectivityObserver
 import com.bibek.chatapplication.utils.connectivity.ConnectivityObserverImpl
 import com.bibek.chatapplication.utils.connectivity.connectivityManager
+import com.bibek.chatapplication.utils.dispatcher.DefaultDispatcherProvider
+import com.bibek.chatapplication.utils.dispatcher.DispatcherProvider
 import com.bibek.chatapplication.utils.logger.NetworkLogger
 import dagger.Module
 import dagger.Provides
@@ -61,6 +63,9 @@ object AppModule {
     fun provideOkHttp(): OkHttpClient {
         return OkHttpClient()
     }
+    @Provides
+    @Singleton
+    fun provideDispatcher():DispatcherProvider = DefaultDispatcherProvider()
 
     /**
      * Provides a singleton instance of [Repository] for managing application data and operations.

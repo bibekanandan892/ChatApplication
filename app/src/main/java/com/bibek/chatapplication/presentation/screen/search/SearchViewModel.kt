@@ -16,6 +16,7 @@ import com.bibek.chatapplication.utils.READ
 import com.bibek.chatapplication.utils.SocketEvent
 import com.bibek.chatapplication.utils.connectivity.ConnectionState
 import com.bibek.chatapplication.utils.connectivity.ConnectivityObserver
+import com.bibek.chatapplication.utils.dispatcher.DispatcherProvider
 import com.bibek.chatapplication.utils.logger.Logger
 import com.bibek.chatapplication.utils.mapper.toFailedMessage
 import com.bibek.chatapplication.utils.mapper.toSendMessage
@@ -23,7 +24,6 @@ import com.bibek.chatapplication.utils.message.extractJsonContent
 import com.bibek.chatapplication.utils.navigation.Navigator
 import com.bibek.chatapplication.utils.toaster.Toaster
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,6 +51,8 @@ import javax.inject.Inject
  * @property repository Repository for interacting with the data layer.
  * @property json JSON serializer/deserializer.
  * @property connectivityObserver Observer for the device's network state.
+ * @property dispatcherProvider Provides coroutine dispatchers for managing threads in a structured way
+ *                              (e.g., main, IO, default) to improve testability and flexibility.
  */
 @HiltViewModel
 class SearchViewModel @Inject constructor(
@@ -59,7 +61,9 @@ class SearchViewModel @Inject constructor(
     private val repository: Repository,
     private val json: Json,
     private val connectivityObserver: ConnectivityObserver,
+    private val dispatcherProvider: DispatcherProvider
 ) : ViewModel() {
+
 
     /**
      * UI State Flow that represents the current state of the search screen.
@@ -238,7 +242,7 @@ class SearchViewModel @Inject constructor(
                 }
             }
         }
-        // Delay to allow for proper sequencing of operations (e.g., database updates).
+        // Delay to see every state of the message. we need to remove this in production.
         delay(1000)
     }
 
@@ -352,7 +356,7 @@ class SearchViewModel @Inject constructor(
         // Update WebSocket state to Connected
         websocketState.update { WebSocketState.Connected }
         // Perform the message sending in the IO dispatcher to avoid blocking the main thread.
-        withContext(Dispatchers.IO) {
+        withContext(dispatcherProvider.io) {
             // Iterate over all failed messages in the repository and resend them.
             repository.getAllFailedMessage().forEach { failedMessage ->
                 val sendMessageRequest = failedMessage.toSendMessage()
@@ -477,7 +481,7 @@ class SearchViewModel @Inject constructor(
      * Clears all chat data from the repository in a background thread.
      */
     private fun clearDb() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatcherProvider.io) {
             // Delete all chats from the repository.
             repository.deleteAllChats()
         }
