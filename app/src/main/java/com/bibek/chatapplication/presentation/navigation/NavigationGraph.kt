@@ -12,7 +12,7 @@ import com.bibek.chatapplication.presentation.screen.home.HomeViewmodel
 import com.bibek.chatapplication.presentation.screen.search.ChatScreen
 import com.bibek.chatapplication.presentation.screen.search.SearchViewModel
 import com.bibek.chatapplication.presentation.screen.signup.SignupScreen
-import com.bibek.chatapplication.presentation.screen.signup.SignupViewmodel
+import com.bibek.chatapplication.presentation.screen.signup.SignupViewModel
 import com.bibek.chatapplication.presentation.screen.splash.SplashScreen
 
 /**
@@ -40,7 +40,7 @@ fun SetupNavGraph(
 
         // Signup screen route
         composable(route = Destination.SIGNUP.name) {
-            val signupViewmodel: SignupViewmodel = hiltViewModel()
+            val signupViewmodel: SignupViewModel = hiltViewModel()
             val uiState by signupViewmodel.uiState.collectAsState()
             SignupScreen(uiState = uiState, signupViewmodel::onEvent)
         }

@@ -1,4 +1,5 @@
 package com.bibek.chatapplication.data.remote
+
 import com.bibek.chatapplication.utils.AUTH_PARAM
 import com.bibek.chatapplication.utils.DEVICE_ID_PARAM
 import com.bibek.chatapplication.utils.ENDPOINT
@@ -11,9 +12,9 @@ import com.bibek.chatapplication.utils.UDID_PARAM
 import com.bibek.chatapplication.utils.USER_AGENT_HEADER
 import com.bibek.chatapplication.utils.USER_AGENT_VALUE
 import com.bibek.chatapplication.utils.WEBSOCKET_BASE_URL
+import com.bibek.chatapplication.utils.dispatcher.DispatcherProvider
 import com.bibek.chatapplication.utils.message.createSocketMessageString
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -37,11 +38,12 @@ import kotlin.coroutines.CoroutineContext
 @Singleton
 class WebsocketClient @Inject constructor(
     private val client: OkHttpClient,
+    private val dispatcherProvider: DispatcherProvider
 ) : CoroutineScope {
 
     // Define the coroutine context as IO dispatcher with a supervisor job.
     override val coroutineContext: CoroutineContext
-        get() = SupervisorJob() + Dispatchers.IO
+        get() = SupervisorJob() + dispatcherProvider.io
 
     // WebSocket instance for managing connection.
     private var ws: WebSocket? = null

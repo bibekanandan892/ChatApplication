@@ -8,6 +8,7 @@ import com.bibek.chatapplication.domain.repository.Repository
 import com.bibek.chatapplication.presentation.navigation.Destination
 import com.bibek.chatapplication.utils.GENERIC_ERROR_MESSAGE
 import com.bibek.chatapplication.utils.USER_AGENT_VALUE
+import com.bibek.chatapplication.utils.dispatcher.DispatcherProvider
 import com.bibek.chatapplication.utils.generateBasicAuthHeader
 import com.bibek.chatapplication.utils.generateToken
 import com.bibek.chatapplication.utils.navigation.Navigator
@@ -15,7 +16,6 @@ import com.bibek.chatapplication.utils.toaster.Toaster
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -34,28 +34,36 @@ import javax.inject.Inject
 /**
  * ViewModel responsible for handling the signup process in the application.
  *
- * This ViewModel manages the UI state for the signup screen, listens to user events, and processes actions like name change, gender selection,
- * and submitting the signup form. It interacts with the repository for data persistence and network operations, and uses `Navigator` to handle
- * navigation actions. It also uses `Toaster` for displaying error or success messages to the user.
+ * This ViewModel manages the UI state for the signup screen, listens to user events, and processes actions like name change,
+ * gender selection, and submitting the signup form. It interacts with the repository for data persistence and network operations,
+ * and uses `Navigator` to handle navigation actions. It also uses `Toaster` for displaying error or success messages to the user.
+ *
+ * The ViewModel employs a `DispatcherProvider` to control coroutine dispatchers for various operations, ensuring a clean separation
+ * between the main thread and background tasks. This enhances testability and flexibility, allowing for custom dispatcher configurations.
  *
  * @param navigator A `Navigator` that handles navigation between screens.
  * @param toaster A `Toaster` used for displaying short messages (e.g., errors, success messages) to the user.
  * @param repository A `Repository` used for performing network operations and data persistence (e.g., authentication, saving user data).
+ * @param dispatcherProvider A `DispatcherProvider` used for defining coroutine dispatchers (`main`, `default`, `io`) to ensure efficient
+ *                           and testable coroutine execution.
  */
 @HiltViewModel
-class SignupViewmodel @Inject constructor(
-    private val navigator: Navigator,  // Handles navigation
-    private val toaster: Toaster,      // Displays messages to the user
-    private val repository: Repository // Performs data operations
+class SignupViewModel @Inject constructor(
+    private val navigator: Navigator,         // Handles navigation
+    private val toaster: Toaster,             // Displays messages to the user
+    private val repository: Repository,       // Performs data operations
+    private val dispatcherProvider: DispatcherProvider // Provides coroutine dispatchers
 ) : ViewModel() {
 
     // MutableStateFlow to manage the UI state, including loading state, gender, and user name (udid).
     private val _uiState = MutableStateFlow(SignupState())
+
     // Public read-only version of _uiState
     val uiState get() = _uiState.asStateFlow()
 
     // MutableSharedFlow to handle user events (e.g., name change, signup button click, gender selection).
     private val _eventFlow = MutableSharedFlow<SignupEvent>(extraBufferCapacity = 10)
+
     // Public read-only version of _eventFlow
     val eventFlow get() = _eventFlow.asSharedFlow()
 
@@ -146,7 +154,10 @@ class SignupViewmodel @Inject constructor(
     private fun signup(deviceId: String = "") {
         val sessionUUID = UUID.randomUUID().toString() // Generate a unique session ID
         val token = generateToken(sessionId = sessionUUID, deviceId = deviceId) // Generate a token
-        val authorization = generateBasicAuthHeader(deviceId = deviceId, token = token) // Generate authorization header
+        val authorization = generateBasicAuthHeader(
+            deviceId = deviceId,
+            token = token
+        ) // Generate authorization header
 
         // Call the repository to authenticate the user and perform necessary actions on success
         repository.authenticate(
@@ -158,12 +169,12 @@ class SignupViewmodel @Inject constructor(
             userAgent = USER_AGENT_VALUE,
             request = AuthRequest(username = uiState.value.udid, password = uiState.value.udid)
         )
-            .flowOn(Dispatchers.IO) // Perform authentication on the IO dispatcher
+            .flowOn(dispatcherProvider.io) // Perform authentication on the IO dispatcher
             .onStart {
                 _uiState.update { uiState -> uiState.copy(isLoading = true) } // Show loading state
             }
             .onEach { authResponse -> // Handle the authentication response
-                withContext(context = Dispatchers.IO) {
+                withContext(context = dispatcherProvider.io) {
                     repository.saveUdidName(authResponse.udid)  // Save the UDID
                     repository.saveAuth(authResponse.auth)     // Save the authentication token
                     repository.saveDeviceId(deviceId)         // Save the device ID
@@ -179,7 +190,9 @@ class SignupViewmodel @Inject constructor(
                 // Handle errors during the authentication process
                 val responseException = it as? ResponseException
                 val errorResponse = responseException?.response?.body<ErrorResponse>()
-                toaster.error(errorResponse?.error?.message ?: GENERIC_ERROR_MESSAGE) // Show error message
+                toaster.error(
+                    errorResponse?.error?.message ?: GENERIC_ERROR_MESSAGE
+                ) // Show error message
                 _uiState.update { uiState -> uiState.copy(isLoading = false) } // Hide loading state
             }
             .launchIn(viewModelScope) // Launch the flow in the ViewModel scope
