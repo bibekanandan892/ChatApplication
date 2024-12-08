@@ -89,6 +89,7 @@ class MainActivity : ComponentActivity() {
 
                     // Wrapper for displaying messages and setting up the navigation graph
                     ContentWithMessageBar(
+                        modifier = Modifier.padding(innerPadding),
                         messageBarState = messageBar,
                         successContainerColor = Primary,
                         successContentColor = Color.White,
