@@ -1,12 +1,42 @@
 package com.bibek.chatapplication.utils
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Resources
 import android.provider.Settings
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Base64
+import java.util.Locale
+import java.util.UUID
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
+
+/**
+ * Retrieves the height of the status bar in pixels.
+ *
+ * This function fetches the system-defined height of the status bar from Android's resources.
+ * The status bar height can vary between devices and configurations. It uses the resource
+ * identifier `status_bar_height` from the "dimen" resource type to get the pixel value.
+ *
+ * @return The height of the status bar in pixels, or 0 if the resource ID is not found.
+ *
+ * ### Usage Example:
+ * ```
+ * val statusBarHeight = getStatusBarHeight()
+ * val statusBarHeightInDp = with(LocalDensity.current) { statusBarHeight.toDp() }
+ * ```
+ *
+ * ### Notes:
+ * - This function fetches the status bar height from the system resources and is
+ *   applicable across various Android API levels.
+ * - For Compose layouts, convert the returned value to DP using `LocalDensity`.
+ */
+@SuppressLint("DiscouragedApi", "InternalInsetResource")
+fun getStatusBarHeight(): Int {
+    val resourceId = Resources.getSystem().getIdentifier("status_bar_height", "dimen", "android")
+    return if (resourceId > 0) Resources.getSystem().getDimensionPixelSize(resourceId) else 0
+}
 
 /**
  * Converts a time in milliseconds to a formatted time string.
@@ -41,6 +71,7 @@ fun generateDeviceId(androidId: String): String {
  * @param context The application context used to access system settings.
  * @return A 32-character uppercase string representing the unique device ID.
  */
+@SuppressLint("HardwareIds")
 fun getAndroidId(context: Context): String {
     return generateDeviceId(
         Settings.Secure.getString(
@@ -87,3 +118,4 @@ fun generateBasicAuthHeader(deviceId: String, token: String): String {
     // Return the Basic Authentication header value
     return "Basic $encodedCredentials"
 }
+
