@@ -85,7 +85,7 @@ class SignupViewModel @Inject constructor(
      *
      * This function subscribes to events such as name change, signup click, and gender selection and calls the appropriate handler.
      */
-    fun collectEvents() {
+    private fun collectEvents() {
         eventFlow.onEach { event ->
             when (event) {
                 is SignupEvent.OnNameChange -> handleNameChange(event)     // Handles name change
@@ -119,7 +119,7 @@ class SignupViewModel @Inject constructor(
         uiState.value.apply {
             // Check if the name length is valid
             if (udid.length < 8) {
-                toaster.error("يرجى إدخال اسم صالح")  // Show error message if the name is too short
+                toaster.error(" يجب ألا يقل اسم المستخدم عن ثمانية")  // Show error message if the name is too short
             }
             // Check if the gender is selected
             else if (gender == null) {
