@@ -5,16 +5,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
@@ -23,7 +22,6 @@ import com.bibek.chatapplication.R
 import com.bibek.chatapplication.presentation.component.ConnectivityStatus
 import com.bibek.chatapplication.presentation.navigation.SetupNavGraph
 import com.bibek.chatapplication.presentation.theme.Primary
-import com.bibek.chatapplication.utils.getStatusBarHeight
 import com.bibek.chatapplication.utils.navigation.Navigator
 import com.bibek.chatapplication.utils.toaster.Toaster
 import com.stevdzasan.messagebar.ContentWithMessageBar
@@ -57,7 +55,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent {
-            val statusBarHeight = with(LocalDensity.current) { getStatusBarHeight().toDp() }
             // Set up navigation controller for the navigation graph
             val navGraphController = rememberNavController()
             val mainViewModel: MainViewModel = hiltViewModel()
@@ -79,12 +76,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
-                        .padding(
-                            top = statusBarHeight, // Ensure the message bar doesn't overlap the status bar
-                            start = innerPadding.calculateStartPadding(LocalLayoutDirection.current),
-                            end = innerPadding.calculateEndPadding(LocalLayoutDirection.current),
-                            bottom = innerPadding.calculateBottomPadding()
-                        )
+                        .windowInsetsPadding(WindowInsets.systemBars)
                 ) {
                     // Display connectivity status based on the observed state
                     isConnectivityAvailable.value?.let {
